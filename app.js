@@ -388,10 +388,16 @@ class App {
         
         // イベントリスナーの設定
         this.setupEventListeners();
-        
+
+        // ギャラリーイベントリスナーの設定
+        this.setupGalleryEventListeners();
+
+        // フローティングチャットの設定
+        this.setupFloatingChat();
+
         // ナビゲーションの初期化
         this.initNavigation();
-        
+
         // チャット機能の初期化
         this.initChat();
         
@@ -3295,30 +3301,338 @@ class App {
     }
     
     loadRecentMatches() {
-        const container = document.getElementById('recent-matches');
+        // 新しいギャラリー描画関数を呼び出し
+        this.renderDashboardGallery();
+    }
+
+    // ダッシュボードギャラリーを描画
+    renderDashboardGallery(filters = {}) {
+        const container = document.getElementById('gallery-grid');
         if (!container) return;
-        
+
         // パフォーマンス最適化: キャッシュからデータを取得
-        const matches = this.loadMatchDataWithCache()
-            .sort((a, b) => (b.id || 0) - (a.id || 0)) // 新しい順
-            .slice(0, 10); // 最新10件のみ表示
-        
+        let matches = this.loadMatchDataWithCache()
+            .sort((a, b) => {
+                // 日付でソート（新しい順）
+                const dateA = new Date(a.date || 0);
+                const dateB = new Date(b.date || 0);
+                return dateB - dateA;
+            });
+
+        // フィルタリング
+        if (filters.result) {
+            matches = matches.filter(m => m.result === filters.result);
+        }
+        if (filters.tag) {
+            matches = matches.filter(m =>
+                m.tags && m.tags.some(t => t.toLowerCase().includes(filters.tag.toLowerCase()))
+            );
+        }
+
         if (matches.length === 0) {
-            container.innerHTML = '<p class="no-data">試合記録がまだありません</p>';
+            container.innerHTML = `
+                <div class="no-matches-message">
+                    <p class="message-text">まだ試合データがありません</p>
+                    <p class="message-sub">設定から戦績をインポートしてください</p>
+                    <button class="btn-secondary" id="goto-settings-import">
+                        戦績をインポートする →
+                    </button>
+                </div>
+            `;
+
+            // イベントリスナーを追加
+            const btn = document.getElementById('goto-settings-import');
+            if (btn) {
+                btn.addEventListener('click', () => this.navigateTo('settings'));
+            }
             return;
         }
-        
+
         container.innerHTML = matches.map(match => {
-            // agent プロパティも認識するように修正
-            const character = match.agent || match.character || 'Unknown';
+            const agent = match.agent || match.character || 'Unknown';
+            const result = (match.result || 'UNKNOWN').toUpperCase();
+            const resultClass = result.toLowerCase();
+
+            // KDA計算
+            const kills = match.kills || 0;
+            const deaths = match.deaths || 0;
+            const assists = match.assists || 0;
+            const kd = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+
+            // 日付フォーマット
+            let dateStr = match.date || '';
+            if (dateStr) {
+                try {
+                    const date = new Date(dateStr);
+                    if (!isNaN(date)) {
+                        dateStr = date.toLocaleDateString('ja-JP', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                } catch (e) {
+                    // 日付パースエラーは無視
+                }
+            }
+
             return `
-            <div class="match-item ${match.result.toLowerCase()}">
-                <span class="match-result">${match.result}</span>
-                <span class="match-character">キャラ: ${character}</span>
-                <span class="match-rounds">ラウンド: ${match.rounds || match.score || 'N/A'}</span>
+                <div class="gallery-match-card ${resultClass}" onclick="app.openMatchDetail('${match.id || match.matchId}')">
+                    <div class="gallery-card-header">
+                        <div class="gallery-map-info">
+                            <h4 class="gallery-map-name">${match.map || 'Unknown'}</h4>
+                            <span class="gallery-score">${match.score || match.rounds || 'N/A'}</span>
+                        </div>
+                        <span class="gallery-result-badge ${resultClass}">${result === 'WIN' ? '勝利' : result === 'LOSS' ? '敗北' : '引分'}</span>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="gallery-agent">${agent}</div>
+                        <div class="gallery-kda">
+                            <span>KDA: ${kills}/${deaths}/${assists}</span>
+                            <span class="gallery-kda-ratio">(${kd})</span>
+                        </div>
+                        <div class="gallery-stats">
+                            <div class="gallery-stat">
+                                <span class="gallery-stat-label">ACS</span>
+                                <span class="gallery-stat-value">${match.acs || 0}</span>
+                            </div>
+                            <div class="gallery-stat">
+                                <span class="gallery-stat-label">ADR</span>
+                                <span class="gallery-stat-value">${match.adr || 0}</span>
+                            </div>
+                            <div class="gallery-stat">
+                                <span class="gallery-stat-label">HS%</span>
+                                <span class="gallery-stat-value">${match.hsPercent || 0}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-card-footer">
+                        <span>${dateStr}</span>
+                        <span>${match.gameMode || 'Competitive'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ギャラリーのイベントリスナーを設定
+    setupGalleryEventListeners() {
+        // フィルター表示切替
+        const toggleBtn = document.getElementById('toggle-gallery-filters');
+        const filtersDiv = document.getElementById('gallery-filters');
+        if (toggleBtn && filtersDiv) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = filtersDiv.style.display === 'none';
+                filtersDiv.style.display = isHidden ? 'block' : 'none';
+            });
+        }
+
+        // フィルター適用
+        const applyBtn = document.getElementById('apply-gallery-filters');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                const resultFilter = document.getElementById('gallery-result-filter')?.value || '';
+                const tagFilter = document.getElementById('gallery-tag-filter')?.value || '';
+                this.renderDashboardGallery({ result: resultFilter, tag: tagFilter });
+            });
+        }
+
+        // フィルタークリア
+        const clearBtn = document.getElementById('clear-gallery-filters');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                const resultSelect = document.getElementById('gallery-result-filter');
+                const tagInput = document.getElementById('gallery-tag-filter');
+                if (resultSelect) resultSelect.value = '';
+                if (tagInput) tagInput.value = '';
+                this.renderDashboardGallery();
+            });
+        }
+    }
+
+    // フローティングチャットの設定
+    setupFloatingChat() {
+        const chatBtn = document.getElementById('floating-chat-btn');
+        const chatPopup = document.getElementById('floating-chat-popup');
+        const closeBtn = document.getElementById('close-chat-popup');
+        const chatInput = document.getElementById('floating-chat-input');
+        const sendBtn = document.getElementById('floating-chat-send');
+
+        if (chatBtn && chatPopup) {
+            chatBtn.addEventListener('click', () => {
+                chatPopup.classList.toggle('hidden');
+                if (!chatPopup.classList.contains('hidden')) {
+                    chatInput?.focus();
+                }
+            });
+        }
+
+        if (closeBtn && chatPopup) {
+            closeBtn.addEventListener('click', () => {
+                chatPopup.classList.add('hidden');
+            });
+        }
+
+        if (chatInput) {
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendFloatingChatMessage();
+                }
+            });
+        }
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => this.sendFloatingChatMessage());
+        }
+    }
+
+    // フローティングチャットメッセージ送信
+    async sendFloatingChatMessage() {
+        const input = document.getElementById('floating-chat-input');
+        const messagesContainer = document.getElementById('floating-chat-messages');
+        const sendBtn = document.getElementById('floating-chat-send');
+
+        if (!input || !messagesContainer) return;
+
+        const message = input.value.trim();
+        if (!message) return;
+
+        // ユーザーメッセージを表示
+        messagesContainer.innerHTML += `
+            <div class="chat-message user">
+                <div class="message-content">${this.escapeHtml(message)}</div>
             </div>
         `;
-        }).join('');
+
+        // 入力をクリア
+        input.value = '';
+        if (sendBtn) sendBtn.disabled = true;
+
+        // ローディング表示
+        const loadingId = 'loading-' + Date.now();
+        messagesContainer.innerHTML += `
+            <div class="chat-message assistant loading" id="${loadingId}">
+                <div class="message-content">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        `;
+
+        // スクロール
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        try {
+            // Gemini APIでレスポンス取得
+            if (!window.geminiService || !window.geminiService.isConfigured()) {
+                throw new Error('APIキーが設定されていません。設定画面でGemini APIキーを設定してください。');
+            }
+
+            // 戦績データを取得してコンテキストに追加
+            const matches = this.loadMatchDataWithCache();
+            let contextInfo = '';
+            if (matches.length > 0) {
+                const recentMatches = matches.slice(0, 5);
+                const wins = recentMatches.filter(m => m.result === 'WIN').length;
+                const avgKD = recentMatches.reduce((sum, m) => {
+                    const deaths = m.deaths || 1;
+                    return sum + (m.kills || 0) / deaths;
+                }, 0) / recentMatches.length;
+
+                contextInfo = `\n\n[プレイヤー情報] 最近5試合: ${wins}勝${5 - wins}敗, 平均K/D: ${avgKD.toFixed(2)}`;
+            }
+
+            const prompt = `あなたはVALORANTの上達をサポートするAIコーチです。プレイヤーの質問に簡潔に答えてください。${contextInfo}\n\n質問: ${message}`;
+
+            const response = await window.geminiService.sendChatMessage(prompt, false);
+
+            // ローディングを削除してレスポンスを表示
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) {
+                loadingEl.outerHTML = `
+                    <div class="chat-message assistant">
+                        <div class="message-content">${this.formatChatResponse(response)}</div>
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            console.error('Chat error:', error);
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) {
+                loadingEl.outerHTML = `
+                    <div class="chat-message assistant">
+                        <div class="message-content" style="color: var(--color-error);">
+                            エラーが発生しました: ${this.escapeHtml(error.message)}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        if (sendBtn) sendBtn.disabled = false;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // チャットレスポンスのフォーマット
+    formatChatResponse(text) {
+        if (!text) return '';
+        return this.escapeHtml(text)
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+
+    // HTMLエスケープ
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ランクからスキルレベルを自動決定
+    determineSkillLevelFromRank(rank) {
+        if (!rank) return 'intermediate';
+
+        const rankLower = rank.toLowerCase();
+
+        // 初心者: Iron, Bronze, Silver
+        if (rankLower.includes('iron') || rankLower.includes('bronze') || rankLower.includes('silver')) {
+            return 'beginner';
+        }
+
+        // 上級者: Diamond, Ascendant, Immortal, Radiant
+        if (rankLower.includes('diamond') || rankLower.includes('ascendant') ||
+            rankLower.includes('immortal') || rankLower.includes('radiant')) {
+            return 'advanced';
+        }
+
+        // 中級者: Gold, Platinum (default)
+        return 'intermediate';
+    }
+
+    // スキル表示を更新
+    updateSkillDisplay() {
+        const skillLevel = localStorage.getItem('playerSkillLevel') || 'intermediate';
+
+        const skillInfo = {
+            'beginner': { icon: '🌱', name: '初心者', desc: '基本的なゲームメカニクスを学習中' },
+            'intermediate': { icon: '📊', name: '中級者', desc: 'バランスの取れたスキルレベル' },
+            'advanced': { icon: '🏆', name: '上級者', desc: '高度な戦略と技術を身につけている' }
+        };
+
+        const info = skillInfo[skillLevel] || skillInfo.intermediate;
+
+        const iconEl = document.getElementById('current-skill-icon');
+        const levelEl = document.getElementById('current-skill-level');
+        const descEl = document.getElementById('current-skill-description');
+
+        if (iconEl) iconEl.textContent = info.icon;
+        if (levelEl) levelEl.textContent = info.name;
+        if (descEl) descEl.textContent = info.desc;
     }
     
     loadAiRecommendations() {
@@ -3606,6 +3920,61 @@ JSONのみを出力してください。`;
                     this.showToast(message, 'success');
                     this.loadDashboardGoals();
                     this.loadGoals(); // 目標ページも更新
+
+                    // 自動でコーチングプランを生成
+                    if (this.coachingPlanService && window.geminiService?.isConfigured()) {
+                        this.showLoading('コーチングプランを自動生成中...');
+
+                        try {
+                            // 新しく追加された目標のIDを収集
+                            const newGoalIds = goalsData.goals
+                                .map((goal, index) => {
+                                    const checkbox = document.getElementById(`goal-${index}`);
+                                    if (checkbox && checkbox.checked) {
+                                        return existingGoals.find(g => g.title === goal.title)?.id;
+                                    }
+                                    return null;
+                                })
+                                .filter(id => id !== null);
+
+                            let plansCreated = 0;
+                            for (const goalId of newGoalIds) {
+                                const goal = existingGoals.find(g => g.id === goalId);
+                                if (goal && !goal.hasCoachingPlan) {
+                                    try {
+                                        const plan = await this.coachingPlanService.generateCoachingPlan({
+                                            id: goal.id,
+                                            title: goal.title,
+                                            description: goal.description,
+                                            deadline: goal.deadline
+                                        });
+
+                                        if (plan) {
+                                            // 目標にプランIDを関連付け
+                                            goal.hasCoachingPlan = true;
+                                            goal.planId = plan.id;
+                                            plansCreated++;
+                                        }
+                                    } catch (planError) {
+                                        console.error(`Failed to create plan for goal ${goalId}:`, planError);
+                                    }
+                                }
+                            }
+
+                            // 更新された目標を保存
+                            localStorage.setItem('goals', JSON.stringify(existingGoals));
+
+                            this.hideLoading();
+
+                            if (plansCreated > 0) {
+                                this.showToast(`${plansCreated}件のコーチングプランを自動生成しました`, 'success');
+                                this.loadCoachingPlans();
+                            }
+                        } catch (planError) {
+                            this.hideLoading();
+                            console.error('Failed to auto-generate coaching plans:', planError);
+                        }
+                    }
                 } else {
                     this.showToast('目標が選択されていません', 'info');
                 }
@@ -8531,6 +8900,25 @@ JSONのみを出力してください。`;
 
                 // 統計を更新
                 this.updatePlayerStats();
+
+                // ランクからスキルレベルを自動決定
+                try {
+                    const stats = await window.valorantAPIService.getPlayerStatsFromStatic();
+                    if (stats && stats.rank && stats.rank.current) {
+                        const autoSkillLevel = this.determineSkillLevelFromRank(stats.rank.current);
+                        const currentSkillLevel = localStorage.getItem('playerSkillLevel');
+
+                        // 現在の設定と異なる場合のみ更新
+                        if (autoSkillLevel && autoSkillLevel !== currentSkillLevel) {
+                            localStorage.setItem('playerSkillLevel', autoSkillLevel);
+                            this.updateSkillDisplay();
+                            console.log(`スキルレベルを自動設定: ${stats.rank.current} → ${autoSkillLevel}`);
+                            this.showToast(`ランク(${stats.rank.current})からスキルレベルを自動設定しました`, 'info');
+                        }
+                    }
+                } catch (skillError) {
+                    console.error('Failed to auto-determine skill level:', skillError);
+                }
             } else {
                 this.showToast(result.message, 'info');
             }
