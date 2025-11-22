@@ -3416,36 +3416,56 @@ class App {
             const { account, rank, stats: matchStats } = stats;
 
             // AIに目標策定を依頼
-            const prompt = `VALORANTプレイヤーの戦績データを分析し、具体的な改善目標を3つ提案してください。
+            // 現在値を明確に変数として保持
+            const currentWinRate = matchStats.winRate;
+            const currentKD = matchStats.avgKD;
+            const currentACS = matchStats.avgACS;
+            const currentADR = matchStats.avgADR;
+            const currentHS = matchStats.avgHS;
 
-【プレイヤー情報】
-- ランク: ${rank.current} (${rank.rr} RR)
-- 勝率: ${matchStats.winRate}%
-- K/D: ${matchStats.avgKD}
-- 平均ACS: ${matchStats.avgACS}
-- 平均ADR: ${matchStats.avgADR}
-- HS率: ${matchStats.avgHS}%
-- 試合数: ${matchStats.totalMatches}
-- トップエージェント: ${matchStats.topAgents?.map(a => a.agent).join(', ') || 'N/A'}
+            const prompt = `あなたはVALORANTコーチです。以下の【現在の戦績データ】を分析し、改善目標を3つ提案してください。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+【現在の戦績データ】※これが実際の値です
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+ランク: ${rank.current} (${rank.rr} RR)
+現在の勝率: ${currentWinRate}%
+現在のK/D: ${currentKD}
+現在のACS: ${currentACS}
+現在のADR: ${currentADR}
+現在のHS率: ${currentHS}%
+試合数: ${matchStats.totalMatches}
+メインエージェント: ${matchStats.topAgents?.map(a => a.agent).join(', ') || 'N/A'}
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【絶対厳守ルール】
+1. 上記の「現在の」値を必ずそのまま使用すること
+2. 現在のHS率は${currentHS}%です。これ以外の値を使用してはいけません
+3. 現在のK/Dは${currentKD}です。これ以外の値を使用してはいけません
+4. 現在の勝率は${currentWinRate}%です。これ以外の値を使用してはいけません
+5. 数値を推測したり、適当な値を作ったりしてはいけません
+6. descriptionには必ず「現在の${currentHS}%から」のように実際の現在値を含めること
 
 【出力形式】
-以下のJSON形式で3つの目標を出力してください。各目標は具体的で測定可能なものにしてください。
+以下のJSON形式で3つの目標を出力してください。
 
 {
   "goals": [
     {
       "title": "目標タイトル（20文字以内）",
-      "description": "具体的な達成方法と数値目標",
+      "description": "現在の○○から△△への具体的な改善方法（必ず上記の現在値を使用）",
       "deadline_days": 7
     }
   ]
 }
 
-【重要】
-- 戦績の弱点を分析して改善目標を設定
-- 1週間〜2週間で達成可能な現実的な目標
-- 数値目標を含める（例：K/Dを0.1改善、HS率を5%向上）
-- JSONのみを出力`;
+【目標設定の指針】
+- 現在値から+3〜5%程度の現実的な改善目標を設定
+- 例：現在のHS率が${currentHS}%なら、目標は${(parseFloat(currentHS) + 3).toFixed(1)}%〜${(parseFloat(currentHS) + 5).toFixed(1)}%程度
+- 例：現在のK/Dが${currentKD}なら、目標は${(parseFloat(currentKD) + 0.1).toFixed(2)}〜${(parseFloat(currentKD) + 0.2).toFixed(2)}程度
+- 1週間で達成可能な目標にする
+
+JSONのみを出力してください。`;
 
             const response = await window.geminiService.sendChatMessage(prompt, false);
 
