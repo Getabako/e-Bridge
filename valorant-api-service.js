@@ -6,6 +6,10 @@ class ValorantAPIService {
         this.region = 'ap'; // デフォルトはアジアパシフィック
         this.platform = 'pc';
 
+        // GitHub Actions連携設定
+        this.staticDataUrl = 'data/valorant-stats.json';
+        this.useStaticData = true; // 静的データを優先使用
+
         // レート制限管理
         this.rateLimitConfig = {
             requestsPerMinute: 30, // Basic keyの制限
@@ -19,7 +23,8 @@ class ValorantAPIService {
             account: null,
             mmr: null,
             matches: [],
-            lastFetch: {}
+            lastFetch: {},
+            staticData: null
         };
         this.cacheDuration = 5 * 60 * 1000; // 5分
 
@@ -27,6 +32,127 @@ class ValorantAPIService {
         this.loadSettings();
 
         console.log('ValorantAPIService initialized');
+    }
+
+    // GitHub Actionsで生成された静的JSONデータを読み込み
+    async loadStaticData() {
+        try {
+            // キャッシュチェック
+            if (this.cache.staticData && this.isCacheValid('staticData')) {
+                console.log('Using cached static data');
+                return this.cache.staticData;
+            }
+
+            console.log('Loading static data from:', this.staticDataUrl);
+            const response = await fetch(this.staticDataUrl);
+
+            if (!response.ok) {
+                console.warn('Static data not available:', response.status);
+                return null;
+            }
+
+            const data = await response.json();
+
+            // キャッシュに保存
+            this.cache.staticData = data;
+            this.cache.lastFetch['staticData'] = Date.now();
+
+            console.log('Static data loaded:', {
+                lastUpdated: data.lastUpdated,
+                account: data.account?.name,
+                matchCount: data.matches?.length
+            });
+
+            return data;
+        } catch (error) {
+            console.warn('Failed to load static data:', error);
+            return null;
+        }
+    }
+
+    // 静的データからプレイヤー統計を取得
+    async getPlayerStatsFromStatic() {
+        const staticData = await this.loadStaticData();
+
+        if (!staticData) {
+            throw new Error('静的データが利用できません。GitHub Actionsでデータを取得してください。');
+        }
+
+        return {
+            account: staticData.account,
+            rank: staticData.rank,
+            stats: staticData.stats,
+            lastUpdated: staticData.lastUpdated
+        };
+    }
+
+    // 静的データからマッチ履歴を取得
+    async getMatchHistoryFromStatic() {
+        const staticData = await this.loadStaticData();
+
+        if (!staticData || !staticData.matches) {
+            return [];
+        }
+
+        return staticData.matches;
+    }
+
+    // 静的データをギャラリーにインポート
+    async importFromStaticData() {
+        try {
+            const staticData = await this.loadStaticData();
+
+            if (!staticData || !staticData.matches || staticData.matches.length === 0) {
+                return {
+                    imported: 0,
+                    skipped: 0,
+                    message: '静的データにマッチが見つかりませんでした'
+                };
+            }
+
+            // 既存のギャラリーデータを取得
+            const existingGallery = JSON.parse(localStorage.getItem('valorant_gallery') || '[]');
+            const existingIds = new Set(existingGallery.map(m => m.matchId || m.id));
+
+            // 新しいマッチをフィルタリング
+            const newMatches = [];
+            let skipped = 0;
+
+            for (const match of staticData.matches) {
+                if (existingIds.has(match.matchId || match.id)) {
+                    skipped++;
+                } else {
+                    newMatches.push(match);
+                }
+            }
+
+            // ギャラリーに追加
+            if (newMatches.length > 0) {
+                const updatedGallery = [...newMatches, ...existingGallery];
+                localStorage.setItem('valorant_gallery', JSON.stringify(updatedGallery));
+            }
+
+            return {
+                imported: newMatches.length,
+                skipped: skipped,
+                total: staticData.matches.length,
+                message: `${newMatches.length}件のマッチをインポートしました${skipped > 0 ? `（${skipped}件は既存）` : ''}`
+            };
+
+        } catch (error) {
+            console.error('Failed to import from static data:', error);
+            throw error;
+        }
+    }
+
+    // 静的データが利用可能かチェック
+    async isStaticDataAvailable() {
+        try {
+            const response = await fetch(this.staticDataUrl, { method: 'HEAD' });
+            return response.ok;
+        } catch {
+            return false;
+        }
     }
 
     // 設定を読み込み

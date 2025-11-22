@@ -1,4 +1,10 @@
 {
+  "name": "e-bridge",
+  "version": "1.0.0",
+  "description": "eSports performance tracking application",
+  "scripts": {
+    "fetch-stats": "node scripts/fetch-valorant-stats.js"
+  },
   "devDependencies": {
     "@playwright/test": "^1.56.1"
   },
