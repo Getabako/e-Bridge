@@ -1,8 +1,265 @@
 {
-  "lastUpdated": null,
-  "account": null,
-  "rank": null,
-  "stats": null,
-  "matches": [],
-  "message": "GitHub Actionsでデータを取得してください。リポジトリのActionsタブから手動実行できます。"
+  "lastUpdated": "2025-11-22T04:29:04.386Z",
+  "account": {
+    "name": "ykun",
+    "tag": "1672",
+    "region": "ap",
+    "accountLevel": 109,
+    "puuid": "7db98635-05b3-565e-acc1-fa926e722bd0",
+    "card": {
+      "small": "https://media.valorant-api.com/playercards/944e2863-4c07-c6aa-923f-c99a7f00aa58/smallart.png",
+      "large": "https://media.valorant-api.com/playercards/944e2863-4c07-c6aa-923f-c99a7f00aa58/largeart.png",
+      "wide": "https://media.valorant-api.com/playercards/944e2863-4c07-c6aa-923f-c99a7f00aa58/wideart.png",
+      "id": "944e2863-4c07-c6aa-923f-c99a7f00aa58"
+    }
+  },
+  "rank": {
+    "current": "Silver 1",
+    "currentTier": 9,
+    "rr": 68,
+    "peak": "Gold 1",
+    "peakSeason": {
+      "id": "5adc33fa-4f30-2899-f131-6fba64c5dd3a",
+      "short": "e10a5"
+    }
+  },
+  "stats": {
+    "totalMatches": 8,
+    "wins": 3,
+    "losses": 5,
+    "winRate": "37.5",
+    "avgKills": "18.0",
+    "avgDeaths": "16.6",
+    "avgAssists": "4.8",
+    "avgKD": "1.08",
+    "avgACS": "0.0",
+    "avgADR": "0.0",
+    "avgHS": "0.0",
+    "topAgents": [
+      {
+        "agent": "Jett",
+        "matches": 2,
+        "wins": 1,
+        "winRate": "50.0"
+      },
+      {
+        "agent": "Chamber",
+        "matches": 2,
+        "wins": 1,
+        "winRate": "50.0"
+      },
+      {
+        "agent": "Skye",
+        "matches": 2,
+        "wins": 1,
+        "winRate": "50.0"
+      },
+      {
+        "agent": "Cypher",
+        "matches": 1,
+        "wins": 0,
+        "winRate": "0.0"
+      },
+      {
+        "agent": "Iso",
+        "matches": 1,
+        "wins": 0,
+        "winRate": "0.0"
+      }
+    ],
+    "topMaps": [
+      {
+        "map": "Split",
+        "matches": 2,
+        "wins": 0,
+        "winRate": "0.0"
+      },
+      {
+        "map": "Abyss",
+        "matches": 2,
+        "wins": 1,
+        "winRate": "50.0"
+      },
+      {
+        "map": "Pearl",
+        "matches": 2,
+        "wins": 1,
+        "winRate": "50.0"
+      },
+      {
+        "map": "Haven",
+        "matches": 1,
+        "wins": 0,
+        "winRate": "0.0"
+      },
+      {
+        "map": "Bind",
+        "matches": 1,
+        "wins": 1,
+        "winRate": "100.0"
+      }
+    ]
+  },
+  "matches": [
+    {
+      "id": "1d717533-33ab-48cc-a9f1-cd30395a0745",
+      "result": "LOSS",
+      "agent": "Jett",
+      "map": "Split",
+      "score": "6-13",
+      "rounds": "6-13",
+      "kills": 18,
+      "deaths": 17,
+      "assists": 6,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Monday, November 17, 2025 10:02 AM",
+      "duration": 31,
+      "gameMode": "Competitive",
+      "matchId": "1d717533-33ab-48cc-a9f1-cd30395a0745",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "45266d85-28a3-49f7-9be4-3c0324758820",
+      "result": "LOSS",
+      "agent": "Cypher",
+      "map": "Abyss",
+      "score": "10-13",
+      "rounds": "10-13",
+      "kills": 24,
+      "deaths": 18,
+      "assists": 4,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Saturday, November 15, 2025 09:11 AM",
+      "duration": 36,
+      "gameMode": "Competitive",
+      "matchId": "45266d85-28a3-49f7-9be4-3c0324758820",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "7897a52e-c6cc-4d81-997e-da673075966b",
+      "result": "LOSS",
+      "agent": "Chamber",
+      "map": "Haven",
+      "score": "4-13",
+      "rounds": "4-13",
+      "kills": 14,
+      "deaths": 16,
+      "assists": 3,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Saturday, November 15, 2025 08:32 AM",
+      "duration": 29,
+      "gameMode": "Competitive",
+      "matchId": "7897a52e-c6cc-4d81-997e-da673075966b",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "b9d62580-945e-4046-877d-57fa9e28ba32",
+      "result": "WIN",
+      "agent": "Jett",
+      "map": "Bind",
+      "score": "13-11",
+      "rounds": "13-11",
+      "kills": 9,
+      "deaths": 19,
+      "assists": 5,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Sunday, November 09, 2025 10:37 AM",
+      "duration": 41,
+      "gameMode": "Competitive",
+      "matchId": "b9d62580-945e-4046-877d-57fa9e28ba32",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "50a21212-bd15-449b-b718-f1675eb91ea5",
+      "result": "WIN",
+      "agent": "Skye",
+      "map": "Pearl",
+      "score": "13-7",
+      "rounds": "13-7",
+      "kills": 24,
+      "deaths": 13,
+      "assists": 7,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Saturday, November 08, 2025 11:47 AM",
+      "duration": 29,
+      "gameMode": "Competitive",
+      "matchId": "50a21212-bd15-449b-b718-f1675eb91ea5",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "21f7b679-04db-476d-990d-3a7acc9fd640",
+      "result": "WIN",
+      "agent": "Chamber",
+      "map": "Abyss",
+      "score": "14-12",
+      "rounds": "14-12",
+      "kills": 22,
+      "deaths": 18,
+      "assists": 4,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Saturday, November 08, 2025 07:08 AM",
+      "duration": 41,
+      "gameMode": "Competitive",
+      "matchId": "21f7b679-04db-476d-990d-3a7acc9fd640",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "cf01fa3b-f50f-44a3-b6a9-fe442c7317fc",
+      "result": "LOSS",
+      "agent": "Skye",
+      "map": "Split",
+      "score": "9-13",
+      "rounds": "9-13",
+      "kills": 18,
+      "deaths": 16,
+      "assists": 6,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Sunday, November 02, 2025 04:01 PM",
+      "duration": 40,
+      "gameMode": "Competitive",
+      "matchId": "cf01fa3b-f50f-44a3-b6a9-fe442c7317fc",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "0aaadef0-5a74-4c95-a8b9-fb9ddbcb280f",
+      "result": "LOSS",
+      "agent": "Iso",
+      "map": "Pearl",
+      "score": "8-13",
+      "rounds": "8-13",
+      "kills": 15,
+      "deaths": 16,
+      "assists": 3,
+      "acs": 0,
+      "adr": 0,
+      "hsPercent": 0,
+      "date": "Sunday, November 02, 2025 03:24 PM",
+      "duration": 33,
+      "gameMode": "Competitive",
+      "matchId": "0aaadef0-5a74-4c95-a8b9-fb9ddbcb280f",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    }
+  ]
 }
