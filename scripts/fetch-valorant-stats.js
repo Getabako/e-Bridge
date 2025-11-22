@@ -82,9 +82,12 @@ function calculateStats(matches, puuid) {
     let totalKills = 0;
     let totalDeaths = 0;
     let totalAssists = 0;
-    let totalACS = 0;
-    let totalADR = 0;
-    let totalHS = 0;
+    let totalScore = 0;
+    let totalDamage = 0;
+    let totalHeadshots = 0;
+    let totalBodyshots = 0;
+    let totalLegshots = 0;
+    let totalRounds = 0;
     const agentStats = {};
     const mapStats = {};
 
@@ -109,9 +112,22 @@ function calculateStats(matches, puuid) {
         totalKills += stats.kills || 0;
         totalDeaths += stats.deaths || 0;
         totalAssists += stats.assists || 0;
-        totalACS += player.acs || 0;
-        totalADR += player.damage_per_round || stats.damage?.dealt || 0;
-        totalHS += player.headshot_percent || 0;
+
+        // ラウンド数を取得
+        const matchRounds = (redScore + blueScore) || 1;
+        totalRounds += matchRounds;
+
+        // スコア（ACS計算用）
+        totalScore += stats.score || 0;
+
+        // ダメージ（ADR計算用）
+        const damage = player.damage_made || stats.damage?.made || stats.damage?.dealt || 0;
+        totalDamage += damage;
+
+        // ヘッドショット関連（HS%計算用）
+        totalHeadshots += stats.headshots || 0;
+        totalBodyshots += stats.bodyshots || 0;
+        totalLegshots += stats.legshots || 0;
 
         // エージェント統計
         const agent = player.character || 'Unknown';
@@ -154,18 +170,28 @@ function calculateStats(matches, puuid) {
         .sort((a, b) => b.matches - a.matches)
         .slice(0, 5);
 
+    // ヘッドショット率を計算
+    const totalShots = totalHeadshots + totalBodyshots + totalLegshots;
+    const hsPercent = totalShots > 0 ? (totalHeadshots / totalShots) * 100 : 0;
+
+    // ACS = スコア / ラウンド数
+    const avgACS = totalRounds > 0 ? totalScore / totalRounds : 0;
+
+    // ADR = ダメージ / ラウンド数
+    const avgADR = totalRounds > 0 ? totalDamage / totalRounds : 0;
+
     return {
         totalMatches,
         wins,
         losses: totalMatches - wins,
-        winRate: totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : 0,
-        avgKills: totalMatches > 0 ? (totalKills / totalMatches).toFixed(1) : 0,
-        avgDeaths: totalMatches > 0 ? (totalDeaths / totalMatches).toFixed(1) : 0,
-        avgAssists: totalMatches > 0 ? (totalAssists / totalMatches).toFixed(1) : 0,
-        avgKD: totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : 0,
-        avgACS: totalMatches > 0 ? (totalACS / totalMatches).toFixed(1) : 0,
-        avgADR: totalMatches > 0 ? (totalADR / totalMatches).toFixed(1) : 0,
-        avgHS: totalMatches > 0 ? (totalHS / totalMatches).toFixed(1) : 0,
+        winRate: totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : "0.0",
+        avgKills: totalMatches > 0 ? (totalKills / totalMatches).toFixed(1) : "0.0",
+        avgDeaths: totalMatches > 0 ? (totalDeaths / totalMatches).toFixed(1) : "0.0",
+        avgAssists: totalMatches > 0 ? (totalAssists / totalMatches).toFixed(1) : "0.0",
+        avgKD: totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : "0.00",
+        avgACS: avgACS.toFixed(1),
+        avgADR: avgADR.toFixed(1),
+        avgHS: hsPercent.toFixed(1),
         topAgents,
         topMaps
     };
@@ -198,6 +224,21 @@ function convertMatchToGalleryFormat(match, puuid) {
     }
 
     const stats = player.stats || {};
+    const matchRounds = (teamScore + enemyScore) || 1;
+
+    // ACS計算（スコア / ラウンド数）
+    const acs = matchRounds > 0 ? (stats.score || 0) / matchRounds : 0;
+
+    // ADR計算（ダメージ / ラウンド数）
+    const damage = player.damage_made || stats.damage?.made || stats.damage?.dealt || 0;
+    const adr = matchRounds > 0 ? damage / matchRounds : 0;
+
+    // HS%計算
+    const headshots = stats.headshots || 0;
+    const bodyshots = stats.bodyshots || 0;
+    const legshots = stats.legshots || 0;
+    const totalShots = headshots + bodyshots + legshots;
+    const hsPercent = totalShots > 0 ? (headshots / totalShots) * 100 : 0;
 
     return {
         id: match.metadata?.matchid || `match_${Date.now()}`,
@@ -209,9 +250,9 @@ function convertMatchToGalleryFormat(match, puuid) {
         kills: stats.kills || 0,
         deaths: stats.deaths || 0,
         assists: stats.assists || 0,
-        acs: player.acs || 0,
-        adr: player.damage_per_round || 0,
-        hsPercent: player.headshot_percent || 0,
+        acs: Math.round(acs * 10) / 10,
+        adr: Math.round(adr * 10) / 10,
+        hsPercent: Math.round(hsPercent * 10) / 10,
         date: match.metadata?.game_start_patched || new Date().toISOString().split('T')[0],
         duration: Math.round((match.metadata?.game_length || 0) / 60),
         gameMode: match.metadata?.mode || 'Competitive',
@@ -297,6 +338,9 @@ async function main() {
         console.log(`Rank: ${result.rank.current} (${result.rank.rr} RR)`);
         console.log(`Win Rate: ${stats.winRate}%`);
         console.log(`K/D: ${stats.avgKD}`);
+        console.log(`HS%: ${stats.avgHS}%`);
+        console.log(`ACS: ${stats.avgACS}`);
+        console.log(`ADR: ${stats.avgADR}`);
         console.log(`Matches: ${stats.totalMatches}`);
         console.log(`Top Agent: ${stats.topAgents[0]?.agent || 'N/A'}`);
 
