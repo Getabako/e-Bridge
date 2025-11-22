@@ -77,7 +77,18 @@ class CoachingPlanService {
             console.log(`🎯 目標: ${title}`);
             console.log(`📅 期間: ${planData.totalWeeks}週間`);
 
-            return await this.generatePlanWithAI(goal, planData);
+            // AIでプランの週を生成
+            const weeks = await this.generatePlanWithAI(goal, planData);
+
+            // プランオブジェクトを作成
+            const plan = this.createPlanObject(goal, weeks);
+
+            // プランを保存
+            this.savePlan(plan);
+
+            console.log(`✅ プラン保存完了: ${plan.id}`);
+
+            return plan;
         } catch (error) {
             console.error('Failed to generate coaching plan:', error);
             throw error;
