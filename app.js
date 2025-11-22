@@ -3603,7 +3603,8 @@ class App {
 
         if (chatInput) {
             chatInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                // IME入力中（変換中）はEnterで送信しない
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
                     e.preventDefault();
                     this.sendFloatingChatMessage();
                 }
@@ -3674,14 +3675,16 @@ class App {
 
             const prompt = `あなたはVALORANTの上達をサポートするAIコーチです。プレイヤーの質問に簡潔に答えてください。${contextInfo}\n\n質問: ${message}`;
 
-            const response = await window.geminiService.sendChatMessage(prompt, false);
+            const result = await window.geminiService.sendChatMessage(prompt, false);
+            // resultはオブジェクト {response: string, usage: object} なので response プロパティを取得
+            const responseText = result.response || result;
 
             // ローディングを削除してレスポンスを表示
             const loadingEl = document.getElementById(loadingId);
             if (loadingEl) {
                 loadingEl.outerHTML = `
                     <div class="chat-message assistant">
-                        <div class="message-content">${this.formatChatResponse(response)}</div>
+                        <div class="message-content">${this.formatChatResponse(responseText)}</div>
                     </div>
                 `;
             }
