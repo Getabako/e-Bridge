@@ -4062,13 +4062,32 @@ JSONのみを出力してください。`;
                     this.loadGoals(); // 目標ページも更新
 
                     // 自動でコーチングプランを生成
-                    if (this.coachingPlanService && window.geminiService?.isConfigured() && newGoalIds.length > 0) {
+                    console.log('🎯 コーチングプラン自動生成チェック:', {
+                        hasCoachingPlanService: !!this.coachingPlanService,
+                        hasGeminiService: !!window.geminiService,
+                        isGeminiConfigured: window.geminiService?.isConfigured?.(),
+                        newGoalIdsLength: newGoalIds.length
+                    });
+
+                    if (newGoalIds.length > 0) {
+                        if (!this.coachingPlanService) {
+                            console.warn('⚠️ coachingPlanServiceが初期化されていません');
+                        }
+                        if (!window.geminiService?.isConfigured?.()) {
+                            console.warn('⚠️ Gemini APIが設定されていません');
+                            this.showToast('コーチングプラン生成にはGemini APIキーが必要です', 'warning');
+                        }
+                    }
+
+                    if (this.coachingPlanService && window.geminiService?.isConfigured?.() && newGoalIds.length > 0) {
                         this.showLoading('コーチングプランを自動生成中...');
 
                         try {
                             let plansCreated = 0;
                             for (const goalId of newGoalIds) {
                                 const goal = existingGoals.find(g => g.id === goalId);
+                                console.log(`📋 プラン生成中: ${goal?.title} (ID: ${goalId})`);
+
                                 if (goal && !goal.hasCoachingPlan) {
                                     try {
                                         const plan = await this.coachingPlanService.generateCoachingPlan({
@@ -4083,9 +4102,13 @@ JSONのみを出力してください。`;
                                             goal.hasCoachingPlan = true;
                                             goal.planId = plan.id;
                                             plansCreated++;
+                                            console.log(`✅ プラン生成成功: ${goal.title}`);
+                                        } else {
+                                            console.warn(`⚠️ プラン生成失敗（null返却）: ${goal.title}`);
                                         }
                                     } catch (planError) {
-                                        console.error(`Failed to create plan for goal ${goalId}:`, planError);
+                                        console.error(`❌ プラン生成エラー for goal ${goalId}:`, planError);
+                                        this.showToast(`プラン生成失敗: ${planError.message}`, 'error');
                                     }
                                 }
                             }
@@ -4098,10 +4121,13 @@ JSONのみを出力してください。`;
                             if (plansCreated > 0) {
                                 this.showToast(`${plansCreated}件のコーチングプランを自動生成しました`, 'success');
                                 this.loadCoachingPlans();
+                            } else {
+                                this.showToast('コーチングプランの生成に失敗しました', 'error');
                             }
                         } catch (planError) {
                             this.hideLoading();
                             console.error('Failed to auto-generate coaching plans:', planError);
+                            this.showToast(`プラン生成エラー: ${planError.message}`, 'error');
                         }
                     }
                 } else {
