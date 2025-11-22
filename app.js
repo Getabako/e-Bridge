@@ -7116,11 +7116,6 @@ JSONのみを出力してください。`;
 
     // コーチングプランページの初期化
     initCoachingPlansPage() {
-        // 更新ボタンのイベントリスナー
-        document.getElementById('refresh-plans-btn')?.addEventListener('click', () => {
-            this.loadCoachingPlans();
-        });
-
         // ステータスフィルターのイベントリスナー
         document.getElementById('plan-status-filter')?.addEventListener('change', (e) => {
             this.filterPlans(e.target.value);
@@ -7132,35 +7127,8 @@ JSONのみを出力してください。`;
 
     // コーチングプランを読み込み
     loadCoachingPlans() {
-        const activePlans = this.coachingPlanService.getActivePlans();
         const allPlans = this.coachingPlanService.getAllPlans();
-
-        this.displayActivePlans(activePlans);
         this.displayAllPlans(allPlans);
-
-        // アクティブなプランがある場合は今週の詳細を表示
-        if (activePlans.length > 0) {
-            this.displayCurrentWeek(activePlans[0]);
-        }
-    }
-
-    // アクティブなプランを表示
-    displayActivePlans(plans) {
-        const container = document.getElementById('active-plans-container');
-        if (!container) return;
-
-        if (plans.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
-                    <h3>アクティブなプランがありません</h3>
-                    <p>目標ページでプラン付きの目標を作成してください</p>
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = plans.map(plan => this.createPlanCard(plan)).join('');
     }
 
     // すべてのプランを表示
@@ -7230,43 +7198,6 @@ JSONのみを出力してください。`;
                     }
                     <button class="btn-danger btn-sm" onclick="app.deletePlan('${plan.id}')">削除</button>
                 </div>
-            </div>
-        `;
-    }
-
-    // 今週の詳細を表示
-    displayCurrentWeek(plan) {
-        const currentWeek = this.coachingPlanService.getCurrentWeekPlan(plan.id);
-        const card = document.getElementById('current-week-card');
-        const content = document.getElementById('current-week-content');
-
-        if (!currentWeek || !card || !content) {
-            if (card) card.style.display = 'none';
-            return;
-        }
-
-        card.style.display = 'block';
-
-        const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
-
-        content.innerHTML = `
-            <div class="week-focus">
-                第${currentWeek.weekNumber}週: ${currentWeek.focus}
-            </div>
-
-            <div class="week-objectives">
-                <h4>今週の目標</h4>
-                <ul class="objectives-list">
-                    ${(currentWeek.objectives || []).map(obj => `<li>${obj}</li>`).join('')}
-                </ul>
-            </div>
-
-
-            <div class="week-objectives">
-                <h4>達成指標</h4>
-                <ul class="objectives-list">
-                    ${(currentWeek.milestones || []).map(milestone => `<li>${milestone}</li>`).join('')}
-                </ul>
             </div>
         `;
     }
