@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ローカルストレージ デバッグツール</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #e94560;
+        }
+        h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        .data-display {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e94560;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        button {
+            background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #00c896 0%, #00a078 100%);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffb800 0%, #d99c00 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .empty {
+            color: #888;
+            font-style: italic;
+        }
+        .success {
+            color: #00c896;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff4655;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 ローカルストレージ デバッグツール</h1>
+
+    <div class="controls">
+        <button onclick="checkStorage()">ストレージを確認</button>
+        <button class="btn-success" onclick="migrateData()">データ移行を実行</button>
+        <button class="btn-warning" onclick="createTestData()">テストデータ作成</button>
+        <button class="btn-danger" onclick="clearAll()">すべてクリア</button>
+    </div>
+
+    <div class="card">
+        <h2>📊 現在の状態</h2>
+        <div class="stats" id="stats-display"></div>
+    </div>
+
+    <div class="card">
+        <h2>🗄️ sf6_gallery の内容</h2>
+        <div class="data-display" id="sf6-data"></div>
+    </div>
+
+    <div class="card">
+        <h2>🗄️ valorant_gallery の内容</h2>
+        <div class="data-display" id="valorant-data"></div>
+    </div>
+
+    <div class="card">
+        <h2>🗄️ recentMatches の内容</h2>
+        <div class="data-display" id="recent-data"></div>
+    </div>
+
+    <div class="card">
+        <h2>🔧 操作ログ</h2>
+        <div class="data-display" id="log-display"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDisplay = document.getElementById('log-display');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            logDisplay.innerHTML += `<div class="${className}">[${timestamp}] ${icon} ${message}</div>`;
+            logDisplay.scrollTop = logDisplay.scrollHeight;
+        }
+
+        function checkStorage() {
+            log('ストレージチェック開始...');
+
+            const sf6Data = JSON.parse(localStorage.getItem('sf6_gallery') || '[]');
+            const valorantData = JSON.parse(localStorage.getItem('valorant_gallery') || '[]');
+            const recentData = JSON.parse(localStorage.getItem('recentMatches') || '[]');
+
+            // 統計表示
+            const statsHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${sf6Data.length}</div>
+                    <div class="stat-label">sf6_gallery</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${valorantData.length}</div>
+                    <div class="stat-label">valorant_gallery</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${recentData.length}</div>
+                    <div class="stat-label">recentMatches</div>
+                </div>
+            `;
+            document.getElementById('stats-display').innerHTML = statsHTML;
+
+            // データ表示
+            document.getElementById('sf6-data').textContent = 
+                sf6Data.length > 0 ? JSON.stringify(sf6Data, null, 2) : '❌ データなし';
+            
+            document.getElementById('valorant-data').textContent = 
+                valorantData.length > 0 ? JSON.stringify(valorantData, null, 2) : '❌ データなし';
+            
+            document.getElementById('recent-data').textContent = 
+                recentData.length > 0 ? JSON.stringify(recentData, null, 2) : '❌ データなし';
+
+            log(`sf6_gallery: ${sf6Data.length}件`, sf6Data.length > 0 ? 'success' : 'info');
+            log(`valorant_gallery: ${valorantData.length}件`, valorantData.length > 0 ? 'success' : 'info');
+            log(`recentMatches: ${recentData.length}件`, recentData.length > 0 ? 'success' : 'info');
+
+            if (sf6Data.length === 0 && valorantData.length === 0 && recentData.length === 0) {
+                log('すべてのストレージが空です！', 'error');
+                log('テストデータを作成してください', 'info');
+            }
+        }
+
+        function migrateData() {
+            log('データ移行を開始...');
+
+            const sf6Data = JSON.parse(localStorage.getItem('sf6_gallery') || '[]');
+            const valorantData = JSON.parse(localStorage.getItem('valorant_gallery') || '[]');
+
+            if (sf6Data.length === 0) {
+                log('sf6_gallery にデータがありません', 'error');
+                return;
+            }
+
+            // sf6_gallery のデータを valorant_gallery にマージ
+            const mergedData = [...valorantData, ...sf6Data];
+
+            // 重複除去
+            const uniqueData = Array.from(
+                new Map(mergedData.map(item => [item.id, item])).values()
+            );
+
+            localStorage.setItem('valorant_gallery', JSON.stringify(uniqueData));
+            log(`${sf6Data.length}件のデータを valorant_gallery に移行しました`, 'success');
+            log(`重複除去後: ${uniqueData.length}件`, 'info');
+
+            checkStorage();
+        }
+
+        function createTestData() {
+            log('テストデータを作成中...');
+
+            const testMatches = [
+                {
+                    id: 'test_' + Date.now() + '_1',
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleDateString('ja-JP'),
+                    playerCharacter: 'Luke',
+                    character: 'Luke',
+                    opponentCharacter: 'Ryu',
+                    opponent: 'Ryu',
+                    result: 'WIN',
+                    score: '2-0',
+                    roundsWon: 2,
+                    roundsLost: 0,
+                    decision: 'ko',
+                    source: 'test',
+                    insightTags: ['#テスト', '#デバッグ'],
+                    feelings: 'テストデータです'
+                },
+                {
+                    id: 'test_' + Date.now() + '_2',
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleDateString('ja-JP'),
+                    playerCharacter: 'Ken',
+                    character: 'Ken',
+                    opponentCharacter: 'Chun-Li',
+                    opponent: 'Chun-Li',
+                    result: 'LOSS',
+                    score: '0-2',
+                    roundsWon: 0,
+                    roundsLost: 2,
+                    decision: 'timeout',
+                    source: 'test',
+                    insightTags: ['#テスト', '#練習'],
+                    feelings: 'テストデータ2'
+                },
+                {
+                    id: 'test_' + Date.now() + '_3',
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleDateString('ja-JP'),
+                    playerCharacter: 'Juri',
+                    character: 'Juri',
+                    opponentCharacter: 'Cammy',
+                    opponent: 'Cammy',
+                    result: 'WIN',
+                    score: '2-1',
+                    roundsWon: 2,
+                    roundsLost: 1,
+                    decision: 'super',
+                    source: 'test',
+                    insightTags: ['#接戦', '#勝利'],
+                    feelings: 'テストデータ3'
+                }
+            ];
+
+            // valorant_gallery に保存
+            localStorage.setItem('valorant_gallery', JSON.stringify(testMatches));
+            
+            // recentMatches にも保存
+            localStorage.setItem('recentMatches', JSON.stringify(testMatches));
+
+            log(`${testMatches.length}件のテストデータを作成しました`, 'success');
+            checkStorage();
+        }
+
+        function clearAll() {
+            if (confirm('すべてのデータを削除しますか？')) {
+                localStorage.removeItem('sf6_gallery');
+                localStorage.removeItem('valorant_gallery');
+                localStorage.removeItem('recentMatches');
+                log('すべてのデータを削除しました', 'success');
+                checkStorage();
+            }
+        }
+
+        // 初期チェック
+        window.onload = function() {
+            log('デバッグツールを起動しました');
+            checkStorage();
+        };
+    </script>
+</body>
+</html>
