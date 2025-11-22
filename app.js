@@ -3278,7 +3278,81 @@ class App {
     }
     
     loadGoals() {
+        // 既存の重複目標を自動クリーンアップ
+        this.cleanupDuplicateGoals();
         this.loadGoalsList();
+    }
+
+    // 重複目標を自動的にクリーンアップ
+    cleanupDuplicateGoals() {
+        try {
+            const goals = JSON.parse(localStorage.getItem('goals') || '[]');
+            if (goals.length === 0) return;
+
+            // 目標カテゴリを判定するキーワード
+            const goalCategories = {
+                'hs': ['HS', 'ヘッドショット', 'HS率', 'ヘッドショット率'],
+                'kd': ['K/D', 'KD', 'キルデス'],
+                'winrate': ['勝率', '勝利率', 'Win'],
+                'acs': ['ACS', 'コンバットスコア'],
+                'adr': ['ADR', 'ダメージ', 'ラウンド毎'],
+                'agent': ['エージェント', 'メインエージェント'],
+                'duelist': ['デュエリスト', 'Jett', 'Phoenix', 'Reyna', 'Raze', 'Yoru', 'Neon', 'Iso'],
+                'ability': ['アビリティ', 'スキル', '能力'],
+                'positioning': ['ポジション', '立ち回り', '位置取り'],
+                'economy': ['エコノミー', 'クレジット', '経済'],
+                'map': ['マップ', 'Split', 'Bind', 'Haven', 'Ascent', 'Pearl', 'Lotus', 'Icebox', 'Breeze', 'Fracture', 'Sunset', 'Abyss']
+            };
+
+            const getGoalCategory = (title) => {
+                for (const [category, keywords] of Object.entries(goalCategories)) {
+                    if (keywords.some(kw => title.includes(kw))) {
+                        return category;
+                    }
+                }
+                return null;
+            };
+
+            // カテゴリごとに最新の目標のみを残す
+            const seenCategories = new Map();
+            const seenTitles = new Set();
+            const uniqueGoals = [];
+
+            // 新しい順（IDが大きい順）にソート
+            const sortedGoals = [...goals].sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            for (const goal of sortedGoals) {
+                const category = getGoalCategory(goal.title);
+                const titleKey = goal.title.replace(/\s+/g, '').toLowerCase();
+
+                // カテゴリがあり、既にそのカテゴリの目標がある場合はスキップ
+                if (category && seenCategories.has(category)) {
+                    continue;
+                }
+
+                // 同じタイトルの目標がある場合はスキップ
+                if (seenTitles.has(titleKey)) {
+                    continue;
+                }
+
+                if (category) {
+                    seenCategories.set(category, true);
+                }
+                seenTitles.add(titleKey);
+                uniqueGoals.push(goal);
+            }
+
+            // 元の順序に戻す（古い順）
+            uniqueGoals.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+            // 重複があった場合のみ保存
+            if (uniqueGoals.length < goals.length) {
+                localStorage.setItem('goals', JSON.stringify(uniqueGoals));
+                console.log(`🧹 重複目標をクリーンアップ: ${goals.length} → ${uniqueGoals.length}`);
+            }
+        } catch (error) {
+            console.error('Failed to cleanup duplicate goals:', error);
+        }
     }
 
     loadGallery() {
