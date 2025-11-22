@@ -287,10 +287,17 @@ async function main() {
 
         await delay(2000);
 
-        // マッチ履歴を取得
-        console.log('\n3. Fetching match history...');
-        const matches = await getMatchHistory('competitive', 20);
-        console.log(`   Found ${matches.length} matches`);
+        // マッチ履歴を取得（Competitiveのみ）
+        console.log('\n3. Fetching match history (Competitive only)...');
+        const allMatches = await getMatchHistory('competitive', 20);
+
+        // 明示的にCompetitiveモードのみをフィルタリング
+        const matches = allMatches.filter(match => {
+            const mode = match.metadata?.mode?.toLowerCase();
+            return mode === 'competitive';
+        });
+
+        console.log(`   Found ${matches.length} competitive matches (filtered from ${allMatches.length})`);
 
         // 統計を計算
         console.log('\n4. Calculating statistics...');
