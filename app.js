@@ -3290,6 +3290,59 @@ class App {
     loadSettings() {
         this.loadGameCategories();
         this.loadApiSettings();
+        this.loadCurrentRank();
+    }
+
+    // 戦績から現在のランクを取得して表示
+    async loadCurrentRank() {
+        const rankValueEl = document.getElementById('current-rank-value');
+        const rankRREl = document.getElementById('current-rank-rr');
+        const rankIconEl = document.getElementById('current-rank-icon');
+
+        if (!rankValueEl) return;
+
+        try {
+            // valorant-api-serviceから戦績データを取得
+            if (window.valorantAPIService) {
+                const stats = await window.valorantAPIService.getPlayerStatsFromStatic();
+
+                if (stats && stats.rank) {
+                    const rankName = stats.rank.current || 'Unknown';
+                    const rankRR = stats.rank.rr || 0;
+
+                    rankValueEl.textContent = rankName;
+                    rankRREl.textContent = `${rankRR} RR`;
+
+                    // ランクに応じたアイコンを設定
+                    const rankIcons = {
+                        'Iron': '🔩',
+                        'Bronze': '🥉',
+                        'Silver': '🥈',
+                        'Gold': '🥇',
+                        'Platinum': '💎',
+                        'Diamond': '💠',
+                        'Ascendant': '⭐',
+                        'Immortal': '👑',
+                        'Radiant': '🌟'
+                    };
+
+                    const iconKey = Object.keys(rankIcons).find(key => rankName.includes(key));
+                    if (iconKey && rankIconEl) {
+                        rankIconEl.textContent = rankIcons[iconKey];
+                    }
+                } else {
+                    rankValueEl.textContent = 'データなし';
+                    rankRREl.textContent = '';
+                }
+            } else {
+                rankValueEl.textContent = 'データなし';
+                rankRREl.textContent = '';
+            }
+        } catch (error) {
+            console.error('Failed to load current rank:', error);
+            rankValueEl.textContent = 'データなし';
+            rankRREl.textContent = '';
+        }
     }
     
     // データロード処理
@@ -3846,6 +3899,10 @@ JSONのみを出力してください。`;
                     'acs': ['ACS', 'コンバットスコア'],
                     'adr': ['ADR', 'ダメージ', 'ラウンド毎'],
                     'agent': ['エージェント', 'メインエージェント'],
+                    'duelist': ['デュエリスト', 'Jett', 'Phoenix', 'Reyna', 'Raze', 'Yoru', 'Neon', 'Iso'],
+                    'ability': ['アビリティ', 'スキル', '能力'],
+                    'positioning': ['ポジション', '立ち回り', '位置取り'],
+                    'economy': ['エコノミー', 'クレジット', '経済'],
                     'map': ['マップ', 'Split', 'Bind', 'Haven', 'Ascent', 'Pearl', 'Lotus', 'Icebox', 'Breeze', 'Fracture', 'Sunset', 'Abyss']
                 };
 
@@ -3860,16 +3917,46 @@ JSONのみを出力してください。`;
                 };
 
                 // 既存の目標を取得
-                const existingGoals = JSON.parse(localStorage.getItem('goals') || '[]');
+                let existingGoals = JSON.parse(localStorage.getItem('goals') || '[]');
 
+                // 新しい目標のカテゴリを収集
+                const newCategories = new Set();
+                goalsData.goals.forEach((goal, index) => {
+                    const checkbox = document.getElementById(`goal-${index}`);
+                    if (checkbox && checkbox.checked) {
+                        const category = getGoalCategory(goal.title);
+                        if (category) {
+                            newCategories.add(category);
+                        }
+                    }
+                });
+
+                // 同じカテゴリの既存目標を全て削除（重複防止）
+                const removedCount = existingGoals.filter(existing => {
+                    const existingCategory = getGoalCategory(existing.title);
+                    return existingCategory && newCategories.has(existingCategory);
+                }).length;
+
+                existingGoals = existingGoals.filter(existing => {
+                    const existingCategory = getGoalCategory(existing.title);
+                    return !existingCategory || !newCategories.has(existingCategory);
+                });
+
+                if (removedCount > 0) {
+                    replacedCount = removedCount;
+                }
+
+                // 新しい目標を追加（IDを収集）
+                const newGoalIds = [];
                 goalsData.goals.forEach((goal, index) => {
                     const checkbox = document.getElementById(`goal-${index}`);
                     if (checkbox && checkbox.checked) {
                         const deadline = new Date();
                         deadline.setDate(deadline.getDate() + (goal.deadline_days || 7));
 
+                        const goalId = Date.now() + index;
                         const goalData = {
-                            id: Date.now() + index,
+                            id: goalId,
                             title: goal.title,
                             description: goal.description,
                             deadline: deadline.toISOString().split('T')[0],
@@ -3878,41 +3965,9 @@ JSONのみを出力してください。`;
                             autoGenerated: true
                         };
 
-                        // 新しい目標のカテゴリを判定
-                        const newCategory = getGoalCategory(goal.title);
-
-                        if (newCategory) {
-                            // 同じカテゴリの既存目標を探す
-                            const existingIndex = existingGoals.findIndex(existing => {
-                                const existingCategory = getGoalCategory(existing.title);
-                                return existingCategory === newCategory && existing.autoGenerated;
-                            });
-
-                            if (existingIndex !== -1) {
-                                // 既存の目標を上書き
-                                goalData.id = existingGoals[existingIndex].id; // IDを保持
-                                existingGoals[existingIndex] = goalData;
-                                replacedCount++;
-                            } else {
-                                // 新規追加
-                                existingGoals.push(goalData);
-                                addedCount++;
-                            }
-                        } else {
-                            // カテゴリなしの目標でも、同じタイトルの既存目標があれば上書き
-                            const existingIndex = existingGoals.findIndex(existing =>
-                                existing.title === goal.title && existing.autoGenerated
-                            );
-
-                            if (existingIndex !== -1) {
-                                goalData.id = existingGoals[existingIndex].id;
-                                existingGoals[existingIndex] = goalData;
-                                replacedCount++;
-                            } else {
-                                existingGoals.push(goalData);
-                                addedCount++;
-                            }
-                        }
+                        existingGoals.push(goalData);
+                        newGoalIds.push(goalId);
+                        addedCount++;
                     }
                 });
 
@@ -3933,21 +3988,10 @@ JSONのみを出力してください。`;
                     this.loadGoals(); // 目標ページも更新
 
                     // 自動でコーチングプランを生成
-                    if (this.coachingPlanService && window.geminiService?.isConfigured()) {
+                    if (this.coachingPlanService && window.geminiService?.isConfigured() && newGoalIds.length > 0) {
                         this.showLoading('コーチングプランを自動生成中...');
 
                         try {
-                            // 新しく追加された目標のIDを収集
-                            const newGoalIds = goalsData.goals
-                                .map((goal, index) => {
-                                    const checkbox = document.getElementById(`goal-${index}`);
-                                    if (checkbox && checkbox.checked) {
-                                        return existingGoals.find(g => g.title === goal.title)?.id;
-                                    }
-                                    return null;
-                                })
-                                .filter(id => id !== null);
-
                             let plansCreated = 0;
                             for (const goalId of newGoalIds) {
                                 const goal = existingGoals.find(g => g.id === goalId);

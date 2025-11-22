@@ -426,6 +426,20 @@
                 <div class="card">
                     <h3>プレイヤープロファイル</h3>
                     <div class="profile-settings">
+                        <!-- 現在のランク表示（戦績から自動取得） -->
+                        <div class="current-rank-display" id="current-rank-display">
+                            <div class="rank-info-section">
+                                <div class="rank-info">
+                                    <span class="rank-icon" id="current-rank-icon">🎮</span>
+                                    <div class="rank-details">
+                                        <span class="rank-label">現在のランク</span>
+                                        <span class="rank-value" id="current-rank-value">取得中...</span>
+                                        <span class="rank-rr" id="current-rank-rr"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="current-profile" id="current-profile-display">
                             <div class="profile-info-section">
                                 <div class="skill-info">
@@ -494,29 +508,6 @@
                     </div>
                 </div>
 
-                <!-- 戦績の取得（GitHub Actionsで自動取得済み） -->
-                <div class="card">
-                    <h3>戦績の取得</h3>
-                    <p class="subtitle">GitHub Actionsで毎日自動取得されるCompetitiveモードの最新シーズンデータを使用</p>
-
-                    <div class="auto-import-section">
-                        <div class="import-actions">
-                            <button id="import-matches-btn" class="btn-primary">
-                                <span class="btn-icon">📥</span>
-                                戦績をインポート
-                            </button>
-                            <button id="view-player-stats-btn" class="btn-secondary">
-                                <span class="btn-icon">📊</span>
-                                プレイヤー統計を表示
-                            </button>
-                        </div>
-
-                        <!-- インポート結果 -->
-                        <div id="import-result" class="import-result" style="display: none;">
-                            <div id="import-result-content"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Coaching Plans Page -->
