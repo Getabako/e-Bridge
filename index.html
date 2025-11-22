@@ -855,92 +855,12 @@
                     </div>
                 </div>
 
-                <!-- Valorant API Settings -->
+                <!-- 戦績の取得（GitHub Actionsで自動取得済み） -->
                 <div class="card">
-                    <h3>Valorant API連携</h3>
-                    <p class="subtitle">Henrik APIを使用してValorantの戦績を自動取得します</p>
-
-                    <div class="settings-list">
-                        <!-- Riot ID設定 -->
-                        <div class="setting-item">
-                            <label for="riot-id-name">Riot ID</label>
-                            <div class="riot-id-input">
-                                <input type="text" id="riot-id-name" placeholder="プレイヤー名" class="riot-id-field">
-                                <span class="riot-id-separator">#</span>
-                                <input type="text" id="riot-id-tag" placeholder="タグ" class="riot-id-tag-field">
-                            </div>
-                        </div>
-
-                        <!-- リージョン設定 -->
-                        <div class="setting-item">
-                            <label for="valorant-region">リージョン</label>
-                            <select id="valorant-region">
-                                <option value="ap">Asia Pacific (日本)</option>
-                                <option value="kr">Korea</option>
-                                <option value="na">North America</option>
-                                <option value="eu">Europe</option>
-                                <option value="latam">Latin America</option>
-                                <option value="br">Brazil</option>
-                            </select>
-                        </div>
-
-                        <!-- Henrik APIキー設定 -->
-                        <div class="setting-item">
-                            <label for="henrik-api-key">Henrik APIキー</label>
-                            <input type="password" id="henrik-api-key" placeholder="HDEV-xxxx-xxxx-xxxx">
-                            <p class="subtitle">
-                                <a href="https://discord.gg/henrikdev" target="_blank" rel="noopener">Henrik Discord</a>で取得できます
-                            </p>
-                        </div>
-
-                        <!-- 接続テスト -->
-                        <div class="setting-item">
-                            <label>接続確認</label>
-                            <button id="test-valorant-api-btn" class="btn-secondary">接続テスト</button>
-                        </div>
-
-                        <!-- 設定保存 -->
-                        <div class="setting-item">
-                            <label>設定を保存</label>
-                            <button id="save-valorant-settings-btn" class="btn-primary">保存</button>
-                        </div>
-                    </div>
-
-                    <!-- API接続ステータス -->
-                    <div id="valorant-api-status" class="api-status" style="margin-top: 15px;">
-                        <div class="status-indicator">
-                            <span id="valorant-connection-status" class="status-dot disconnected"></span>
-                            <span id="valorant-connection-text">未接続</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 戦績自動取得 -->
-                <div class="card">
-                    <h3>戦績の自動取得</h3>
-                    <p class="subtitle">設定したRiot IDの戦績を自動で取得します</p>
+                    <h3>戦績の取得</h3>
+                    <p class="subtitle">GitHub Actionsで毎日自動取得されるCompetitiveモードの最新シーズンデータを使用</p>
 
                     <div class="auto-import-section">
-                        <div class="import-options">
-                            <div class="form-group">
-                                <label for="import-mode">ゲームモード</label>
-                                <select id="import-mode">
-                                    <option value="competitive">ランクマッチ</option>
-                                    <option value="unrated">アンレート</option>
-                                    <option value="deathmatch">デスマッチ</option>
-                                    <option value="spikerush">スパイクラッシュ</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="import-count">取得件数</label>
-                                <select id="import-count">
-                                    <option value="5">最新5件</option>
-                                    <option value="10" selected>最新10件</option>
-                                    <option value="20">最新20件</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div class="import-actions">
                             <button id="import-matches-btn" class="btn-primary">
                                 <span class="btn-icon">📥</span>

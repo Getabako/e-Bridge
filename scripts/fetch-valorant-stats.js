@@ -291,13 +291,30 @@ async function main() {
         console.log('\n3. Fetching match history (Competitive only)...');
         const allMatches = await getMatchHistory('competitive', 20);
 
-        // 明示的にCompetitiveモードのみをフィルタリング
-        const matches = allMatches.filter(match => {
+        // Competitiveモードのみをフィルタリング
+        const competitiveMatches = allMatches.filter(match => {
             const mode = match.metadata?.mode?.toLowerCase();
             return mode === 'competitive';
         });
 
-        console.log(`   Found ${matches.length} competitive matches (filtered from ${allMatches.length})`);
+        // 最新シーズンを特定（最初のマッチのシーズンを基準）
+        let currentSeason = null;
+        let currentSeasonName = 'Unknown';
+        if (competitiveMatches.length > 0) {
+            currentSeason = competitiveMatches[0].metadata?.season_id;
+            // シーズン名を推測（APIからは詳細名が取れない場合がある）
+            currentSeasonName = currentSeason ? `Season ${currentSeason.substring(0, 8)}` : 'Current';
+        }
+
+        // 最新シーズンのマッチのみをフィルタリング
+        const matches = currentSeason
+            ? competitiveMatches.filter(match => match.metadata?.season_id === currentSeason)
+            : competitiveMatches;
+
+        console.log(`   Found ${matches.length} matches in current season (from ${competitiveMatches.length} competitive matches)`);
+        if (currentSeason) {
+            console.log(`   Current season ID: ${currentSeason}`);
+        }
 
         // 統計を計算
         console.log('\n4. Calculating statistics...');
