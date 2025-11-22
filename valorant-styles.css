@@ -972,24 +972,32 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-accent) 0%, #ff6b8a 100%);
+    background: transparent;
     border: none;
-    box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    font-size: 1.5rem;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.floating-chat-btn .chat-btn-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .floating-chat-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 30px rgba(233, 69, 96, 0.6);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
 }
 
 .floating-chat-btn:active {
@@ -1165,13 +1173,12 @@
     .floating-chat-btn {
         bottom: 16px;
         right: 16px;
-        width: 50px;
-        height: 50px;
-        font-size: 1.3rem;
+        width: 56px;
+        height: 56px;
     }
 
     .floating-chat-popup {
-        bottom: 76px;
+        bottom: 82px;
         right: 8px;
         left: 8px;
         width: auto;
