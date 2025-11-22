@@ -905,6 +905,14 @@ class App {
             });
         }
 
+        // 戦績から目標を自動策定ボタン
+        const autoGenerateGoalsBtn = document.getElementById('auto-generate-goals-btn');
+        if (autoGenerateGoalsBtn) {
+            autoGenerateGoalsBtn.addEventListener('click', () => {
+                this.generateGoalsFromStats();
+            });
+        }
+
         // コーチングプランモーダルイベント
         this.initCoachingPlanModal();
         
@@ -3381,6 +3389,154 @@ class App {
         this.loadGoalsList();
     }
 
+    // 戦績から目標を自動策定
+    async generateGoalsFromStats() {
+        if (!window.valorantAPIService) {
+            this.showToast('Valorant APIサービスが利用できません', 'error');
+            return;
+        }
+
+        if (!window.geminiService || !window.geminiService.isConfigured()) {
+            this.showToast('目標の自動策定にはGemini APIキーが必要です', 'error');
+            return;
+        }
+
+        try {
+            this.showLoading('戦績を分析して目標を策定中...');
+
+            // 静的データから戦績を取得
+            const stats = await window.valorantAPIService.getPlayerStatsFromStatic();
+
+            if (!stats || !stats.stats) {
+                this.hideLoading();
+                this.showToast('戦績データがありません。先にGitHub Actionsでデータを取得してください。', 'error');
+                return;
+            }
+
+            const { account, rank, stats: matchStats } = stats;
+
+            // AIに目標策定を依頼
+            const prompt = `VALORANTプレイヤーの戦績データを分析し、具体的な改善目標を3つ提案してください。
+
+【プレイヤー情報】
+- ランク: ${rank.current} (${rank.rr} RR)
+- 勝率: ${matchStats.winRate}%
+- K/D: ${matchStats.avgKD}
+- 平均ACS: ${matchStats.avgACS}
+- 平均ADR: ${matchStats.avgADR}
+- HS率: ${matchStats.avgHS}%
+- 試合数: ${matchStats.totalMatches}
+- トップエージェント: ${matchStats.topAgents?.map(a => a.agent).join(', ') || 'N/A'}
+
+【出力形式】
+以下のJSON形式で3つの目標を出力してください。各目標は具体的で測定可能なものにしてください。
+
+{
+  "goals": [
+    {
+      "title": "目標タイトル（20文字以内）",
+      "description": "具体的な達成方法と数値目標",
+      "deadline_days": 7
+    }
+  ]
+}
+
+【重要】
+- 戦績の弱点を分析して改善目標を設定
+- 1週間〜2週間で達成可能な現実的な目標
+- 数値目標を含める（例：K/Dを0.1改善、HS率を5%向上）
+- JSONのみを出力`;
+
+            const response = await window.geminiService.sendChatMessage(prompt, false);
+
+            this.hideLoading();
+
+            // JSONを抽出
+            let goalsData;
+            try {
+                const jsonMatch = response.response.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    goalsData = JSON.parse(jsonMatch[0]);
+                } else {
+                    throw new Error('JSON形式で取得できませんでした');
+                }
+            } catch (e) {
+                console.error('Failed to parse goals JSON:', e);
+                this.showToast('目標の生成に失敗しました。再試行してください。', 'error');
+                return;
+            }
+
+            if (!goalsData.goals || goalsData.goals.length === 0) {
+                this.showToast('目標を生成できませんでした', 'error');
+                return;
+            }
+
+            // 生成された目標をユーザーに確認
+            const goalsHtml = goalsData.goals.map((goal, index) => `
+                <div style="text-align: left; margin-bottom: 15px; padding: 10px; background: var(--bg-secondary); border-radius: 8px;">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="goal-${index}" checked style="margin-top: 3px;">
+                        <div>
+                            <strong>${goal.title}</strong>
+                            <p style="margin: 5px 0 0; font-size: 12px; color: var(--text-secondary);">
+                                ${goal.description}
+                            </p>
+                            <small style="color: var(--color-accent);">期限: ${goal.deadline_days}日後</small>
+                        </div>
+                    </label>
+                </div>
+            `).join('');
+
+            const result = await Swal.fire({
+                title: '目標の自動策定',
+                html: `
+                    <p style="margin-bottom: 15px;">戦績を分析して以下の目標を策定しました。追加する目標を選択してください。</p>
+                    ${goalsHtml}
+                `,
+                width: '600px',
+                showCancelButton: true,
+                confirmButtonText: '選択した目標を追加',
+                cancelButtonText: 'キャンセル'
+            });
+
+            if (result.isConfirmed) {
+                // 選択された目標を追加
+                let addedCount = 0;
+                goalsData.goals.forEach((goal, index) => {
+                    const checkbox = document.getElementById(`goal-${index}`);
+                    if (checkbox && checkbox.checked) {
+                        const deadline = new Date();
+                        deadline.setDate(deadline.getDate() + (goal.deadline_days || 7));
+
+                        const goalData = {
+                            id: Date.now() + index,
+                            title: goal.title,
+                            description: goal.description,
+                            deadline: deadline.toISOString().split('T')[0],
+                            progress: 0,
+                            createdAt: new Date().toISOString(),
+                            autoGenerated: true
+                        };
+
+                        this.addGoal(goalData);
+                        addedCount++;
+                    }
+                });
+
+                if (addedCount > 0) {
+                    this.showToast(`${addedCount}件の目標を追加しました`, 'success');
+                    this.loadDashboardGoals();
+                } else {
+                    this.showToast('目標が選択されていません', 'info');
+                }
+            }
+
+        } catch (error) {
+            this.hideLoading();
+            console.error('Failed to generate goals:', error);
+            this.showToast(`目標の策定に失敗しました: ${error.message}`, 'error');
+        }
+    }
 
     // デバッグ用: 特定の目標の進捗を強制的に更新する関数
     forceUpdateGoalByTitle(title, progress) {
@@ -8265,21 +8421,11 @@ class App {
             return;
         }
 
-        if (!window.valorantAPIService.isConfigured()) {
-            this.showToast('先にValorant API設定を完了してください', 'error');
-            return;
-        }
-
         try {
-            const modeSelect = document.getElementById('import-mode');
-            const countSelect = document.getElementById('import-count');
-
-            const mode = modeSelect?.value || 'competitive';
-            const count = parseInt(countSelect?.value) || 10;
-
             this.showLoading('戦績を取得中...');
 
-            const result = await window.valorantAPIService.importMatchHistory(mode, count);
+            // 静的データからインポートを試みる
+            const result = await window.valorantAPIService.importFromStaticData();
 
             this.hideLoading();
 
@@ -8333,15 +8479,11 @@ class App {
             return;
         }
 
-        if (!window.valorantAPIService.isConfigured()) {
-            this.showToast('先にValorant API設定を完了してください', 'error');
-            return;
-        }
-
         try {
             this.showLoading('統計を取得中...');
 
-            const stats = await window.valorantAPIService.getPlayerStats();
+            // 静的データから統計を取得
+            const stats = await window.valorantAPIService.getPlayerStatsFromStatic();
 
             this.hideLoading();
 
@@ -8472,8 +8614,8 @@ class App {
 
     // 自動取得データを基にAIコーチング分析を実行
     async analyzeWithAICoaching() {
-        if (!window.valorantAPIService || !window.valorantAPIService.isConfigured()) {
-            this.showToast('先にValorant API設定を完了してください', 'error');
+        if (!window.valorantAPIService) {
+            this.showToast('Valorant APIサービスが利用できません', 'error');
             return;
         }
 
@@ -8485,8 +8627,8 @@ class App {
         try {
             this.showLoading('AI分析中...');
 
-            // プレイヤー統計を取得
-            const stats = await window.valorantAPIService.getPlayerStats();
+            // 静的データからプレイヤー統計を取得
+            const stats = await window.valorantAPIService.getPlayerStatsFromStatic();
 
             // AI分析用のプロンプトを生成
             const analysisPrompt = this.generateAIAnalysisPrompt(stats);
