@@ -3662,18 +3662,90 @@ class App {
             // 戦績データを取得してコンテキストに追加
             const matches = this.loadMatchDataWithCache();
             let contextInfo = '';
-            if (matches.length > 0) {
-                const recentMatches = matches.slice(0, 5);
-                const wins = recentMatches.filter(m => m.result === 'WIN').length;
-                const avgKD = recentMatches.reduce((sum, m) => {
-                    const deaths = m.deaths || 1;
-                    return sum + (m.kills || 0) / deaths;
-                }, 0) / recentMatches.length;
 
-                contextInfo = `\n\n[プレイヤー情報] 最近5試合: ${wins}勝${5 - wins}敗, 平均K/D: ${avgKD.toFixed(2)}`;
+            if (matches.length > 0) {
+                // 全試合の統計を計算
+                const totalMatches = matches.length;
+                const wins = matches.filter(m => m.result === 'WIN').length;
+                const losses = totalMatches - wins;
+                const winRate = ((wins / totalMatches) * 100).toFixed(1);
+
+                // K/D計算
+                const totalKills = matches.reduce((sum, m) => sum + (m.kills || 0), 0);
+                const totalDeaths = matches.reduce((sum, m) => sum + (m.deaths || 0), 0);
+                const totalAssists = matches.reduce((sum, m) => sum + (m.assists || 0), 0);
+                const avgKD = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : '0.00';
+
+                // HS%計算
+                const matchesWithHS = matches.filter(m => m.hsPercent !== undefined);
+                const avgHS = matchesWithHS.length > 0
+                    ? (matchesWithHS.reduce((sum, m) => sum + (m.hsPercent || 0), 0) / matchesWithHS.length).toFixed(1)
+                    : '不明';
+
+                // ACS計算
+                const matchesWithACS = matches.filter(m => m.acs !== undefined);
+                const avgACS = matchesWithACS.length > 0
+                    ? (matchesWithACS.reduce((sum, m) => sum + (m.acs || 0), 0) / matchesWithACS.length).toFixed(1)
+                    : '不明';
+
+                // ADR計算
+                const matchesWithADR = matches.filter(m => m.adr !== undefined);
+                const avgADR = matchesWithADR.length > 0
+                    ? (matchesWithADR.reduce((sum, m) => sum + (m.adr || 0), 0) / matchesWithADR.length).toFixed(1)
+                    : '不明';
+
+                // エージェント別統計
+                const agentStats = {};
+                matches.forEach(m => {
+                    const agent = m.agent || 'Unknown';
+                    if (!agentStats[agent]) {
+                        agentStats[agent] = { matches: 0, wins: 0 };
+                    }
+                    agentStats[agent].matches++;
+                    if (m.result === 'WIN') agentStats[agent].wins++;
+                });
+                const topAgents = Object.entries(agentStats)
+                    .map(([agent, data]) => `${agent}(${data.matches}試合, ${((data.wins/data.matches)*100).toFixed(0)}%)`)
+                    .slice(0, 3)
+                    .join(', ');
+
+                // マップ別統計
+                const mapStats = {};
+                matches.forEach(m => {
+                    const map = m.map || 'Unknown';
+                    if (!mapStats[map]) {
+                        mapStats[map] = { matches: 0, wins: 0 };
+                    }
+                    mapStats[map].matches++;
+                    if (m.result === 'WIN') mapStats[map].wins++;
+                });
+                const topMaps = Object.entries(mapStats)
+                    .map(([map, data]) => `${map}(${data.matches}試合, ${((data.wins/data.matches)*100).toFixed(0)}%)`)
+                    .slice(0, 3)
+                    .join(', ');
+
+                // 最近5試合の詳細
+                const recentMatches = matches.slice(0, 5);
+                const recentDetail = recentMatches.map(m =>
+                    `${m.result}(${m.agent}, ${m.map}, ${m.kills}/${m.deaths}/${m.assists})`
+                ).join(', ');
+
+                contextInfo = `
+
+[プレイヤー統計情報]
+- 総試合数: ${totalMatches}試合 (${wins}勝${losses}敗, 勝率${winRate}%)
+- 平均K/D: ${avgKD}
+- 平均HS率: ${avgHS}%
+- 平均ACS: ${avgACS}
+- 平均ADR: ${avgADR}
+- よく使うエージェント: ${topAgents || 'なし'}
+- よく遊ぶマップ: ${topMaps || 'なし'}
+- 最近5試合: ${recentDetail}
+
+この情報を元に質問に答えてください。`;
             }
 
-            const prompt = `あなたはVALORANTの上達をサポートするAIコーチです。プレイヤーの質問に簡潔に答えてください。${contextInfo}\n\n質問: ${message}`;
+            const prompt = `あなたはVALORANTの上達をサポートするAIコーチです。プレイヤーの戦績データを元に具体的なアドバイスをしてください。${contextInfo}\n\n質問: ${message}`;
 
             const result = await window.geminiService.sendChatMessage(prompt, false);
             // resultはオブジェクト {response: string, usage: object} なので response プロパティを取得
