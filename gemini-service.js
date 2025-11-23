@@ -531,13 +531,15 @@ ${goals.length > 0 ? goals.map(g => `- ${g.title} (期限: ${g.deadline})`).join
     }
 
     // チャットメッセージ送信
-    async sendChatMessage(message, includeHistory = true) {
+    async sendChatMessage(message, includeHistory = true, showOverlay = true) {
         if (!this.isConfigured()) {
             throw new Error('Gemini APIキーが設定されていません');
         }
 
         try {
-            try { window.app?.showLoading('AIが考え中...'); } catch {}
+            if (showOverlay) {
+                try { window.app?.showLoading('AIが考え中...'); } catch {}
+            }
             const context = this.getGameContext();
             const systemPrompt = this.generateSystemPrompt(context);
 
@@ -626,11 +628,15 @@ ${goals.length > 0 ? goals.map(g => `- ${g.title} (期限: ${g.deadline})`).join
                 usage: data.usageMetadata || {}
             };
 
-            try { window.app?.hideLoading(); } catch {}
+            if (showOverlay) {
+                try { window.app?.hideLoading(); } catch {}
+            }
             return result;
 
         } catch (error) {
-            try { window.app?.hideLoading(); } catch {}
+            if (showOverlay) {
+                try { window.app?.hideLoading(); } catch {}
+            }
             console.error('Gemini chat error:', error);
             throw error;
         }

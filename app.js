@@ -3722,8 +3722,9 @@ class App {
 
             const prompt = `あなたはVALORANTの上達をサポートするAIコーチです。プレイヤーの戦績データを元に具体的なアドバイスをしてください。${contextInfo}\n\n質問: ${message}`;
 
-            const result = await window.geminiService.sendChatMessage(prompt, false);
+            const result = await window.geminiService.sendChatMessage(prompt, false, false);
             // resultはオブジェクト {response: string, usage: object} なので response プロパティを取得
+            // 第3引数のfalseでフルスクリーンローディングオーバーレイを無効化
             const responseText = result.response || result;
 
             // ローディングを削除してレスポンスを表示
