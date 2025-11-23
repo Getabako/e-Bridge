@@ -3474,9 +3474,9 @@ class App {
         }
     }
     
-    loadRecentMatches() {
+    async loadRecentMatches() {
         // 新しいギャラリー描画関数を呼び出し
-        this.renderDashboardGallery();
+        await this.renderDashboardGallery();
     }
 
     // ダッシュボードギャラリーを描画
@@ -3529,19 +3529,10 @@ class App {
         if (matches.length === 0) {
             container.innerHTML = `
                 <div class="no-matches-message">
-                    <p class="message-text">まだ試合データがありません</p>
-                    <p class="message-sub">設定から戦績をインポートしてください</p>
-                    <button class="btn-secondary" id="goto-settings-import">
-                        戦績をインポートする →
-                    </button>
+                    <p class="message-text">戦績データを読み込み中...</p>
+                    <p class="message-sub">ワークフローでアカウントを接続してください</p>
                 </div>
             `;
-
-            // イベントリスナーを追加
-            const btn = document.getElementById('goto-settings-import');
-            if (btn) {
-                btn.addEventListener('click', () => this.navigateTo('settings'));
-            }
             return;
         }
 
