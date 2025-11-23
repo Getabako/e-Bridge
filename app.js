@@ -3355,8 +3355,8 @@ class App {
         }
     }
 
-    loadGallery() {
-        this.loadGalleryMatches();
+    async loadGallery() {
+        await this.loadGalleryMatches();
         this.loadOpponentFilter();
         this.setupGallerySelectionMode();
     }
@@ -7578,14 +7578,33 @@ JSONのみを出力してください。`;
     // Gallery Functions
     // ==========================================
 
-    loadGalleryMatches(filters = {}) {
-        // VALORANTマッチデータを取得（valorant_galleryとvalorant_matchesの両方を統合）
-        const valorantGallery = JSON.parse(localStorage.getItem('valorant_gallery') || '[]');
-        const valorantMatches = JSON.parse(localStorage.getItem('valorant_matches') || '[]');
-        const matches = [...valorantGallery, ...valorantMatches];
+    async loadGalleryMatches(filters = {}) {
         const galleryGrid = document.getElementById('gallery-grid');
-        
         if (!galleryGrid) return;
+
+        // VALORANTマッチデータを取得（valorant_galleryとvalorant_matchesの両方を統合）
+        let valorantGallery = JSON.parse(localStorage.getItem('valorant_gallery') || '[]');
+        const valorantMatches = JSON.parse(localStorage.getItem('valorant_matches') || '[]');
+        let matches = [...valorantGallery, ...valorantMatches];
+
+        // localStorageにデータがない場合、valorant-stats.jsonから取得
+        if (matches.length === 0) {
+            try {
+                const response = await fetch('data/valorant-stats.json');
+                if (response.ok) {
+                    const statsData = await response.json();
+                    if (statsData.matches && statsData.matches.length > 0) {
+                        matches = statsData.matches.map(m => ({
+                            ...m,
+                            timestamp: new Date(m.date).getTime() || Date.now()
+                        }));
+                        console.log('Loaded matches from valorant-stats.json:', matches.length);
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to load from valorant-stats.json:', error);
+            }
+        }
 
         // フィルターを適用
         let filteredMatches = matches;
@@ -7855,7 +7874,7 @@ JSONのみを出力してください。`;
         // TODO: 編集モーダルを表示して、試合データを編集できるようにする
     }
 
-    deleteMatch(matchId) {
+    async deleteMatch(matchId) {
         if (!confirm('この試合データを削除してもよろしいですか？')) {
             return;
         }
@@ -7884,7 +7903,7 @@ JSONのみを出力してください。`;
 
         this.showToast('試合データを削除しました', 'success');
         this.closeMatchDetailModal();
-        this.loadGalleryMatches();
+        await this.loadGalleryMatches();
 
         // ダッシュボード統計も更新
         if (this.currentPage === 'dashboard') {
@@ -7922,23 +7941,23 @@ JSONのみを出力してください。`;
         const clearBtn = document.getElementById('clear-filters');
 
         if (applyBtn) {
-            applyBtn.addEventListener('click', () => {
+            applyBtn.addEventListener('click', async () => {
                 const filters = {
                     agent: document.getElementById('filter-opponent')?.value || '', // VALORANTではエージェントでフィルタ
                     result: document.getElementById('filter-result')?.value || '',
                     tag: document.getElementById('filter-tag')?.value || ''
                 };
 
-                this.loadGalleryMatches(filters);
+                await this.loadGalleryMatches(filters);
             });
         }
 
         if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
+            clearBtn.addEventListener('click', async () => {
                 document.getElementById('filter-opponent').value = '';
                 document.getElementById('filter-result').value = '';
                 document.getElementById('filter-tag').value = '';
-                this.loadGalleryMatches();
+                await this.loadGalleryMatches();
             });
         }
     }
@@ -8205,7 +8224,7 @@ JSONのみを出力してください。`;
     }
 
     // 選択された試合を削除
-    deleteSelectedMatches() {
+    async deleteSelectedMatches() {
         if (this.selectedMatches.size === 0) {
             this.showToast('削除する試合を選択してください', 'warning');
             return;
@@ -8280,7 +8299,7 @@ JSONのみを出力してください。`;
         this.cancelSelectionMode();
 
         // ギャラリーを再読み込み
-        this.loadGalleryMatches();
+        await this.loadGalleryMatches();
 
         // ダッシュボードの統計も更新
         this.loadDashboard();
