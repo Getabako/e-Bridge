@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-11-22T07:01:52.036Z",
+  "lastUpdated": "2025-11-23T00:03:04.379Z",
   "account": {
     "name": "ykun",
     "tag": "1672",
@@ -16,7 +16,7 @@
   "rank": {
     "current": "Silver 1",
     "currentTier": 9,
-    "rr": 68,
+    "rr": 34,
     "peak": "Gold 1",
     "peakSeason": {
       "id": "5adc33fa-4f30-2899-f131-6fba64c5dd3a",
@@ -24,26 +24,32 @@
     }
   },
   "stats": {
-    "totalMatches": 8,
+    "totalMatches": 10,
     "wins": 3,
-    "losses": 5,
-    "winRate": "37.5",
-    "avgKills": "18.0",
-    "avgDeaths": "16.6",
-    "avgAssists": "4.8",
-    "avgKD": "1.08",
-    "avgACS": "232.6",
-    "avgADR": "143.9",
-    "avgHS": "17.0",
+    "losses": 7,
+    "winRate": "30.0",
+    "avgKills": "17.8",
+    "avgDeaths": "16.2",
+    "avgAssists": "4.2",
+    "avgKD": "1.10",
+    "avgACS": "236.1",
+    "avgADR": "146.6",
+    "avgHS": "16.3",
     "topAgents": [
       {
-        "agent": "Jett",
-        "matches": 2,
+        "agent": "Chamber",
+        "matches": 3,
         "wins": 1,
-        "winRate": "50.0"
+        "winRate": "33.3"
       },
       {
-        "agent": "Chamber",
+        "agent": "Cypher",
+        "matches": 2,
+        "wins": 0,
+        "winRate": "0.0"
+      },
+      {
+        "agent": "Jett",
         "matches": 2,
         "wins": 1,
         "winRate": "50.0"
@@ -55,12 +61,6 @@
         "winRate": "50.0"
       },
       {
-        "agent": "Cypher",
-        "matches": 1,
-        "wins": 0,
-        "winRate": "0.0"
-      },
-      {
         "agent": "Iso",
         "matches": 1,
         "wins": 0,
@@ -69,22 +69,22 @@
     ],
     "topMaps": [
       {
+        "map": "Pearl",
+        "matches": 3,
+        "wins": 1,
+        "winRate": "33.3"
+      },
+      {
+        "map": "Abyss",
+        "matches": 3,
+        "wins": 1,
+        "winRate": "33.3"
+      },
+      {
         "map": "Split",
         "matches": 2,
         "wins": 0,
         "winRate": "0.0"
-      },
-      {
-        "map": "Abyss",
-        "matches": 2,
-        "wins": 1,
-        "winRate": "50.0"
-      },
-      {
-        "map": "Pearl",
-        "matches": 2,
-        "wins": 1,
-        "winRate": "50.0"
       },
       {
         "map": "Haven",
@@ -101,6 +101,46 @@
     ]
   },
   "matches": [
+    {
+      "id": "c2c24d97-cc3e-4157-a50f-7e40704adaed",
+      "result": "LOSS",
+      "agent": "Chamber",
+      "map": "Pearl",
+      "score": "12-14",
+      "rounds": "12-14",
+      "kills": 26,
+      "deaths": 17,
+      "assists": 2,
+      "acs": 262,
+      "adr": 167.1,
+      "hsPercent": 14.3,
+      "date": "Saturday, November 22, 2025 04:01 PM",
+      "duration": 42,
+      "gameMode": "Competitive",
+      "matchId": "c2c24d97-cc3e-4157-a50f-7e40704adaed",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
+    {
+      "id": "bf487441-9604-4529-9618-77dc8cc3c744",
+      "result": "LOSS",
+      "agent": "Cypher",
+      "map": "Abyss",
+      "score": "0-12",
+      "rounds": "0-12",
+      "kills": 8,
+      "deaths": 12,
+      "assists": 2,
+      "acs": 229.8,
+      "adr": 140.7,
+      "hsPercent": 11.6,
+      "date": "Saturday, November 22, 2025 03:38 PM",
+      "duration": 20,
+      "gameMode": "Competitive",
+      "matchId": "bf487441-9604-4529-9618-77dc8cc3c744",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
     {
       "id": "1d717533-33ab-48cc-a9f1-cd30395a0745",
       "result": "LOSS",
