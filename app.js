@@ -3480,18 +3480,41 @@ class App {
     }
 
     // ダッシュボードギャラリーを描画
-    renderDashboardGallery(filters = {}) {
+    async renderDashboardGallery(filters = {}) {
         const container = document.getElementById('gallery-grid');
         if (!container) return;
 
         // パフォーマンス最適化: キャッシュからデータを取得
-        let matches = this.loadMatchDataWithCache()
-            .sort((a, b) => {
-                // 日付でソート（新しい順）
-                const dateA = new Date(a.date || 0);
-                const dateB = new Date(b.date || 0);
-                return dateB - dateA;
-            });
+        let matches = this.loadMatchDataWithCache();
+
+        // localStorageにデータがない場合、valorant-stats.jsonから直接取得
+        if (matches.length === 0) {
+            try {
+                const response = await fetch('data/valorant-stats.json');
+                if (response.ok) {
+                    const statsData = await response.json();
+                    if (statsData.matches && statsData.matches.length > 0) {
+                        matches = statsData.matches.map(m => ({
+                            ...m,
+                            timestamp: new Date(m.date).getTime() || Date.now()
+                        }));
+                        // localStorageに保存して次回以降はキャッシュを使用
+                        localStorage.setItem('valorant_gallery', JSON.stringify(matches));
+                        this.cachedMatchData = null; // キャッシュをリセット
+                        console.log('valorant-stats.jsonから' + matches.length + '試合を読み込みました');
+                    }
+                }
+            } catch (error) {
+                console.error('valorant-stats.jsonの読み込みに失敗:', error);
+            }
+        }
+
+        // 日付でソート（新しい順）
+        matches = matches.sort((a, b) => {
+            const dateA = new Date(a.date || 0);
+            const dateB = new Date(b.date || 0);
+            return dateB - dateA;
+        });
 
         // フィルタリング
         if (filters.result) {
