@@ -71,7 +71,10 @@ class App {
     
     async init() {
         console.log('App initializing...');
-        
+
+        // valorant-stats.jsonから戦績データを自動インポート
+        await this.autoImportValorantStats();
+
         // テーマの初期化
         this.initTheme();
         
@@ -124,7 +127,51 @@ class App {
         
         console.log('App initialized successfully');
     }
-    
+
+    // valorant-stats.jsonから戦績データを自動インポート
+    async autoImportValorantStats() {
+        try {
+            // 既存のデータをチェック
+            const existingGallery = JSON.parse(localStorage.getItem('valorant_gallery') || '[]');
+            const existingMatches = JSON.parse(localStorage.getItem('valorant_matches') || '[]');
+
+            // 既にデータがある場合はスキップ
+            if (existingGallery.length > 0 || existingMatches.length > 0) {
+                console.log('既存の戦績データがあります。自動インポートをスキップ');
+                return;
+            }
+
+            // valorant-stats.jsonからデータを取得
+            const response = await fetch('data/valorant-stats.json');
+            if (!response.ok) {
+                console.log('valorant-stats.json が見つかりません');
+                return;
+            }
+
+            const statsData = await response.json();
+            if (!statsData.matches || statsData.matches.length === 0) {
+                console.log('valorant-stats.json に試合データがありません');
+                return;
+            }
+
+            // 試合データをlocalStorageに保存
+            const matchesToImport = statsData.matches.map(m => ({
+                ...m,
+                timestamp: new Date(m.date).getTime() || Date.now(),
+                importedFromAPI: true
+            }));
+
+            localStorage.setItem('valorant_gallery', JSON.stringify(matchesToImport));
+
+            // キャッシュを無効化
+            this.cachedMatchData = null;
+
+            console.log(`valorant-stats.jsonから${matchesToImport.length}試合をインポートしました`);
+        } catch (error) {
+            console.warn('戦績データの自動インポートに失敗:', error);
+        }
+    }
+
     // テーマ管理
     initTheme() {
         // 既に初期化済みの場合はスキップ（重複イベントリスナーを防ぐ）
