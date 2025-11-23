@@ -3234,13 +3234,10 @@ class App {
     }
     
     // 各ページのロード処理
-    loadDashboard() {
-        // 新しい統計システムを使用
-        if (this.playerStatsManager) {
-            this.playerStatsManager.loadRecentMatches();
-        } else {
-            this.loadRecentMatches();
-        }
+    async loadDashboard() {
+        // ギャラリーを読み込み（valorant-stats.jsonから自動取得）
+        await this.renderDashboardGallery();
+
         // 新しい統計システムを使用
         if (this.playerStatsManager) {
             this.playerStatsManager.loadStatsToUI();
