@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2025-11-28T01:20:57.790Z",
+  "lastUpdated": "2025-11-29T01:21:15.455Z",
   "account": {
     "name": "ykun",
     "tag": "1672",
     "region": "ap",
-    "accountLevel": 110,
+    "accountLevel": 111,
     "puuid": "7db98635-05b3-565e-acc1-fa926e722bd0",
     "card": {
       "small": "https://media.valorant-api.com/playercards/944e2863-4c07-c6aa-923f-c99a7f00aa58/smallart.png",
@@ -16,7 +16,7 @@
   "rank": {
     "current": "Silver 1",
     "currentTier": 9,
-    "rr": 59,
+    "rr": 38,
     "peak": "Gold 1",
     "peakSeason": {
       "id": "5adc33fa-4f30-2899-f131-6fba64c5dd3a",
@@ -28,13 +28,13 @@
     "wins": 5,
     "losses": 5,
     "winRate": "50.0",
-    "avgKills": "16.9",
-    "avgDeaths": "13.8",
+    "avgKills": "16.4",
+    "avgDeaths": "13.5",
     "avgAssists": "4.1",
-    "avgKD": "1.22",
-    "avgACS": "235.0",
-    "avgADR": "151.8",
-    "avgHS": "17.6",
+    "avgKD": "1.21",
+    "avgACS": "240.7",
+    "avgADR": "155.5",
+    "avgHS": "18.0",
     "topAgents": [
       {
         "agent": "Cypher",
@@ -101,6 +101,26 @@
     ]
   },
   "matches": [
+    {
+      "id": "b680a9a0-1bce-4d4d-9e97-f19e8e036459",
+      "result": "LOSS",
+      "agent": "Chamber",
+      "map": "Pearl",
+      "score": "6-13",
+      "rounds": "6-13",
+      "kills": 21,
+      "deaths": 14,
+      "assists": 2,
+      "acs": 328.5,
+      "adr": 209.9,
+      "hsPercent": 18,
+      "date": "Friday, November 28, 2025 11:21 AM",
+      "duration": 27,
+      "gameMode": "Competitive",
+      "matchId": "b680a9a0-1bce-4d4d-9e97-f19e8e036459",
+      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
+      "importedFromAPI": true
+    },
     {
       "id": "2b2a8323-f38a-4439-aa69-ae3fc5b814ef",
       "result": "WIN",
@@ -278,26 +298,6 @@
       "duration": 34,
       "gameMode": "Competitive",
       "matchId": "79850c30-fb10-4d14-a8ad-6df65c9ce21b",
-      "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
-      "importedFromAPI": true
-    },
-    {
-      "id": "c2c24d97-cc3e-4157-a50f-7e40704adaed",
-      "result": "LOSS",
-      "agent": "Chamber",
-      "map": "Pearl",
-      "score": "12-14",
-      "rounds": "12-14",
-      "kills": 26,
-      "deaths": 17,
-      "assists": 2,
-      "acs": 262,
-      "adr": 167.1,
-      "hsPercent": 14.3,
-      "date": "Saturday, November 22, 2025 04:01 PM",
-      "duration": 42,
-      "gameMode": "Competitive",
-      "matchId": "c2c24d97-cc3e-4157-a50f-7e40704adaed",
       "season": "4c4b8cff-43eb-13d3-8f14-96b783c90cd2",
       "importedFromAPI": true
     }
