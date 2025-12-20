@@ -39,26 +39,51 @@ class VoiceChatService {
         this.recognition.onstart = () => {
             console.log('Voice recognition started');
             this.updateMicButtonState(true);
+            this.updateStatusDisplay('音声認識開始... 話しかけてください');
+        };
+
+        this.recognition.onaudiostart = () => {
+            console.log('Audio capture started');
+            this.updateStatusDisplay('マイク入力中...');
+        };
+
+        this.recognition.onsoundstart = () => {
+            console.log('Sound detected');
+            this.updateStatusDisplay('音声を検出中...');
+        };
+
+        this.recognition.onspeechstart = () => {
+            console.log('Speech detected');
+            this.updateStatusDisplay('話している内容を認識中...');
+        };
+
+        this.recognition.onspeechend = () => {
+            console.log('Speech ended');
+            this.updateStatusDisplay('認識処理中...');
         };
 
         this.recognition.onend = () => {
             console.log('Voice recognition ended');
             // リスニング状態なら再開（no-speechでendが呼ばれた場合）
             if (this.isListening) {
+                this.updateStatusDisplay('再開準備中...');
                 this.scheduleRestart();
             } else {
                 this.updateMicButtonState(false);
+                this.updateStatusDisplay('');
             }
         };
 
         this.recognition.onresult = (event) => {
             const results = event.results;
             const lastResult = results[results.length - 1];
+            const confidence = lastResult[0].confidence;
 
             if (lastResult.isFinal) {
                 const transcript = lastResult[0].transcript.trim();
+                console.log('Final result:', transcript, 'confidence:', confidence);
+                this.updateStatusDisplay(`確定: "${transcript}" (信頼度: ${Math.round(confidence * 100)}%)`);
                 if (transcript) {
-                    console.log('Final result:', transcript);
                     // 停止してから送信
                     this.stopListening();
                     this.onSpeechResult(transcript);
@@ -66,6 +91,8 @@ class VoiceChatService {
             } else {
                 // 中間結果を表示
                 const interimTranscript = lastResult[0].transcript;
+                console.log('Interim result:', interimTranscript);
+                this.updateStatusDisplay(`認識中: "${interimTranscript}"`);
                 this.onInterimResult(interimTranscript);
             }
         };
@@ -76,30 +103,65 @@ class VoiceChatService {
             switch (event.error) {
                 case 'no-speech':
                     // 音声が検出されなかった - リスニング中なら継続
-                    // onendで再開されるので、ここでは何もしない
+                    this.updateStatusDisplay('音声が検出されませんでした。もう一度話してください...');
                     break;
 
                 case 'not-allowed':
                 case 'service-not-allowed':
                     this.stopListening();
+                    this.updateStatusDisplay('エラー: マイクへのアクセスが許可されていません');
                     this.showToast('マイクへのアクセスが許可されていません', 'error');
                     break;
 
                 case 'network':
                     this.stopListening();
+                    this.updateStatusDisplay('エラー: ネットワーク接続に問題があります');
                     this.showToast('ネットワークエラー', 'error');
                     break;
 
+                case 'audio-capture':
+                    this.stopListening();
+                    this.updateStatusDisplay('エラー: マイクが見つかりません');
+                    this.showToast('マイクが見つかりません', 'error');
+                    break;
+
                 case 'aborted':
-                    // ユーザーによる中止 - 何もしない
+                    // ユーザーによる中止
+                    this.updateStatusDisplay('音声認識を停止しました');
                     break;
 
                 default:
-                    // その他のエラー
                     console.warn('Speech recognition error:', event.error);
+                    this.updateStatusDisplay(`エラー: ${event.error}`);
                     break;
             }
         };
+    }
+
+    /**
+     * ステータス表示を更新
+     */
+    updateStatusDisplay(message) {
+        let statusEl = document.getElementById('voice-status-display');
+
+        if (!statusEl) {
+            // ステータス表示要素を作成
+            const chatPopup = document.querySelector('.floating-chat-popup');
+            if (chatPopup) {
+                statusEl = document.createElement('div');
+                statusEl.id = 'voice-status-display';
+                statusEl.className = 'voice-status-display';
+                const footer = chatPopup.querySelector('.chat-popup-footer');
+                if (footer) {
+                    footer.insertBefore(statusEl, footer.firstChild);
+                }
+            }
+        }
+
+        if (statusEl) {
+            statusEl.textContent = message;
+            statusEl.style.display = message ? 'block' : 'none';
+        }
     }
 
     /**

@@ -1253,6 +1253,34 @@ input[type="checkbox"]:checked::after {
   flex: 1;
 }
 
+/* Voice Status Display */
+.voice-status-display {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(191, 0, 255, 0.1));
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: var(--neon-cyan);
+  text-align: center;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.voice-status-display:empty {
+  display: none;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    border-color: rgba(0, 245, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.1);
+  }
+  50% {
+    border-color: rgba(0, 245, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+  }
+}
+
 @media (max-width: 768px) {
   .page-header h2 {
     font-size: 1.8rem;
