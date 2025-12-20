@@ -104,7 +104,7 @@ class App {
 
             // 過負荷状態の場合は追加メッセージを表示
             if (apiCheckResult.overloaded) {
-                this.showToast('⚠️ Gemini APIが過負荷状態です。時間をおいて再度お試しください。', 'warning');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが過負荷状態です。時間をおいて再度お試しください。', 'warning');
             }
         } else {
             console.log('API未設定または接続失敗');
@@ -115,7 +115,7 @@ class App {
                 apiCheckResult.error.message.includes('過負荷') ||
                 apiCheckResult.error.message.includes('overloaded')
             )) {
-                this.showToast('⚠️ Gemini APIが一時的に過負荷中です。APIキーは保存されているので、後ほど自動的に利用可能になります。', 'warning');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが一時的に過負荷中です。APIキーは保存されているので、後ほど自動的に利用可能になります。', 'warning');
                 // 過負荷の場合でもアプリは起動する
                 await this.initializeMainApp();
             } else {
@@ -210,7 +210,7 @@ class App {
         
         if (theme === 'light') {
             root.setAttribute('data-theme', 'light');
-            if (themeBtn) themeBtn.textContent = '☀️';
+            if (themeBtn) themeBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
             
             // ライトモードのスタイル
             root.style.setProperty('--bg-primary', '#ffffff');
@@ -223,7 +223,7 @@ class App {
             root.style.setProperty('--accent-secondary', '#0052a3');
         } else {
             root.setAttribute('data-theme', 'dark');
-            if (themeBtn) themeBtn.textContent = '🌙';
+            if (themeBtn) themeBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
             
             // ダークモードのスタイル
             root.style.setProperty('--bg-primary', '#1a1a2e');
@@ -350,7 +350,7 @@ class App {
             // APIキーが設定済みとしてアプリを起動する
             if (error.message && (error.message.includes('overloaded') || error.message.includes('503'))) {
                 console.log('Gemini APIサーバーが過負荷中ですが、APIキーは設定済みのためアプリを起動します');
-                this.showToast('⚠️ Gemini APIが一時的に過負荷中です。AI機能は後ほど利用可能になります。', 'warning');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが一時的に過負荷中です。AI機能は後ほど利用可能になります。', 'warning');
                 this.syncAPIKeyInputs();
                 return { success: true, overloaded: true };
             }
@@ -532,7 +532,7 @@ class App {
         if (apiKeyInput && toggleBtn) {
             const isPassword = apiKeyInput.type === 'password';
             apiKeyInput.type = isPassword ? 'text' : 'password';
-            toggleBtn.textContent = isPassword ? '🙈' : '👁️';
+            toggleBtn.textContent = isPassword ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
         }
     }
     
@@ -985,7 +985,7 @@ class App {
                 const apiKeyInput = document.getElementById('api-key');
                 if (apiKeyInput) {
                     apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
-                    toggleApiKey.textContent = apiKeyInput.type === 'password' ? '👁️' : '👁️‍🗨️';
+                    toggleApiKey.textContent = apiKeyInput.type === 'password' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>‍🗨️';
                 }
             });
         }
@@ -1514,7 +1514,7 @@ class App {
     async generateInsightTags() {
         // 多重実行を防止
         if (this._isGeneratingTags) {
-            console.warn('⚠️ タグ生成は既に実行中です');
+            console.warn('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> タグ生成は既に実行中です');
             return;
         }
         
@@ -1524,15 +1524,15 @@ class App {
         const analysisSource = document.querySelector('input[name="analysis-source"]:checked');
 
         if (!feelingsInput || !feelingsInput.value.trim()) {
-            this.showToast('❌ 感想を入力してください', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 感想を入力してください', 'error');
             return;
         }
         if (!this.geminiService) {
-            this.showToast('❌ AIサービスが初期化されていません', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> AIサービスが初期化されていません', 'error');
             return;
         }
         if (!analysisSource) {
-            this.showToast('❌ 情報ソースを選択してください', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 情報ソースを選択してください', 'error');
             return;
         }
 
@@ -1543,7 +1543,7 @@ class App {
             this._isGeneratingTags = true; // フラグを立てる
             if (generateBtn) {
                 generateBtn.disabled = true;
-                generateBtn.textContent = '🤖 分析中...';
+                generateBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg> 分析中...';
             }
 
             if (analysisSource.value === 'file') {
@@ -1578,7 +1578,7 @@ class App {
 
                 // ファイルサイズ警告（6000文字制限をユーザーに通知）
                 if (totalSize > 6000) {
-                    this.showToast(`⚠️ 選択されたファイルは${totalSize}文字です。AIの分析には最初の6,000文字のみが使用されます。`, 'warning');
+                    this.showToast(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 選択されたファイルは${totalSize}文字です。AIの分析には最初の6,000文字のみが使用されます。`, 'warning');
                 }
 
                 fileContent = fileContents.join('\n\n');
@@ -1612,23 +1612,23 @@ class App {
 
             // フォールバックモードかグラウンディング成功かに応じてメッセージを表示
             if (result.fallbackMode) {
-                this.showToast('✅ 推敲・AI分析を完了しました（通常モード）', 'success');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 推敲・AI分析を完了しました（通常モード）', 'success');
             } else if (result.groundingSources && result.groundingSources.totalSources > 0) {
-                this.showToast(`✅ 推敲・分析完了（参考情報${result.groundingSources.totalSources}件）`, 'success');
+                this.showToast(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 推敲・分析完了（参考情報${result.groundingSources.totalSources}件）`, 'success');
             } else {
-                this.showToast('✅ 推敲・AI分析を完了しました', 'success');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 推敲・AI分析を完了しました', 'success');
             }
 
         } catch (error) {
             console.error('タグ生成エラー:', error);
-            this.showToast('❌ タグ生成に失敗しました: ' + error.message, 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> タグ生成に失敗しました: ' + error.message, 'error');
         } finally {
             this._isGeneratingTags = false; // フラグを解除
             // ボタンを再度取得して状態を更新
             const finalBtn = document.getElementById('generate-tags-btn');
             if (finalBtn) {
                 finalBtn.disabled = false;
-                finalBtn.textContent = '🤖 AIでタグ生成';
+                finalBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg> AIでタグ生成';
             }
         }
     }
@@ -1649,9 +1649,9 @@ class App {
 
         refinedDisplay.innerHTML = `
             <div class="refined-header">
-                <h5>🔍 AI分析結果</h5>
+                <h5><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> AI分析結果</h5>
                 <button type="button" class="btn-text" onclick="this.parentElement.parentElement.style.display='none'">
-                    ✕ 閉じる
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 閉じる
                 </button>
             </div>
             <div class="refined-content">
@@ -1677,7 +1677,7 @@ class App {
                 ` : ''}
                 ${refinedContent.metaInsights && refinedContent.metaInsights.length > 0 ? `
                 <div class="refined-section">
-                    <strong>🌐 最新メタ情報:</strong>
+                    <strong><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 最新メタ情報:</strong>
                     <ul>
                         ${refinedContent.metaInsights.map(insight => `<li>${insight}</li>`).join('')}
                     </ul>
@@ -1710,9 +1710,9 @@ class App {
 
         sourcesDisplay.innerHTML = `
             <div class="sources-header">
-                <h5>📚 参考にした情報源 (${groundingSources.totalSources}件)</h5>
+                <h5><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 参考にした情報源 (${groundingSources.totalSources}件)</h5>
                 <button type="button" class="btn-text" onclick="this.parentElement.parentElement.style.display='none'">
-                    ✕ 閉じる
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 閉じる
                 </button>
             </div>
             <div class="sources-content">
@@ -2072,7 +2072,7 @@ class App {
         // フォームをリセット
         this.resetQuickForm();
 
-        this.showToast('✅ VALORANT試合データを記録しました！', 'success');
+        this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> VALORANT試合データを記録しました！', 'success');
 
         // ダッシュボードを更新
         if (this.currentPage === 'dashboard') {
@@ -2100,7 +2100,7 @@ class App {
             console.log('VALORANT試合データを保存しました:', matchData);
         } catch (error) {
             console.error('試合データの保存に失敗しました:', error);
-            this.showToast('❌ データの保存に失敗しました', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> データの保存に失敗しました', 'error');
         }
     }
 
@@ -2309,7 +2309,7 @@ class App {
             ctx.font = '20px sans-serif';
             ctx.fillStyle = '#e94560';
             ctx.textAlign = 'center';
-            ctx.fillText('📝 記録しよう！', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 記録しよう！', canvas.width / 2, canvas.height / 2);
             return;
         }
 
@@ -2467,7 +2467,7 @@ class App {
         if (!container) return;
 
         if (matches.length === 0) {
-            container.innerHTML = '<p class="no-data-message">📝 記録しよう！</p>';
+            container.innerHTML = '<p class="no-data-message"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 記録しよう！</p>';
             return;
         }
 
@@ -2544,7 +2544,7 @@ class App {
         if (lowestStageWinRate) {
             html += `
                 <div class="challenge-item">
-                    <div class="challenge-icon">🗺️</div>
+                    <div class="challenge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
                     <div class="challenge-info">
                         <div class="challenge-label">苦手なマップ</div>
                         <div class="challenge-name">${lowestStageWinRate.stage}</div>
@@ -2563,7 +2563,7 @@ class App {
         if (lowestAgentWinRate) {
             html += `
                 <div class="challenge-item">
-                    <div class="challenge-icon">🎮</div>
+                    <div class="challenge-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg></div>
                     <div class="challenge-info">
                         <div class="challenge-label">苦手なキャラ/エージェント</div>
                         <div class="challenge-name">${lowestAgentWinRate.agent}</div>
@@ -2762,7 +2762,7 @@ class App {
         if (matches.length === 0) {
             return `
                 <div style="text-align: center; padding: 40px;">
-                    <p style="font-size: 20px; color: #ffff00;">📊 まだ試合データがありません</p>
+                    <p style="font-size: 20px; color: #ffff00;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> まだ試合データがありません</p>
                     <p style="font-size: 16px; color: #fff; margin-top: 20px;">
                         試合を記録して統計を確認しましょう！
                     </p>
@@ -2846,7 +2846,7 @@ class App {
             <div class="rpg-stats-section" style="max-height: 600px; overflow-y: auto;">
                 <!-- ステージ別勝率テーブル -->
                 <div style="margin-bottom: 30px;">
-                    <h3 style="color: #ffff00; margin-bottom: 15px; font-size: 18px;">🗺️ ステージ別勝率</h3>
+                    <h3 style="color: #ffff00; margin-bottom: 15px; font-size: 18px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> ステージ別勝率</h3>
                     <table class="stats-table" id="stage-stats-table" style="width: 100%; border-collapse: collapse; background: rgba(0, 0, 0, 0.3);">
                         <thead>
                             <tr style="background: rgba(255, 255, 255, 0.1); border-bottom: 2px solid #ffff00;">
@@ -2920,7 +2920,7 @@ class App {
 
                 <!-- 対戦キャラクター別勝率テーブル（既存機能維持） -->
                 <div style="margin-bottom: 30px;">
-                    <h3 style="color: #ffff00; margin-bottom: 15px; font-size: 18px;">⚔️ 対戦キャラクター別勝率</h3>
+                    <h3 style="color: #ffff00; margin-bottom: 15px; font-size: 18px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/><line x1="3" y1="19" x2="5" y2="21"/></svg> 対戦キャラクター別勝率</h3>
                     <table class="stats-table" id="opponent-stats-table" style="width: 100%; border-collapse: collapse; background: rgba(0, 0, 0, 0.3);">
                         <thead>
                             <tr style="background: rgba(255, 255, 255, 0.1); border-bottom: 2px solid #ffff00;">
@@ -3297,7 +3297,7 @@ class App {
                     <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">アップロードされたファイルがありません</p>
                     <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">分析に使用するファイルを設定ページからアップロードしてください</p>
                     <button class="btn btn-primary" onclick="app.showPage('settings')" style="padding: 0.75rem 2rem; font-size: 1rem;">
-                        ⚙️ 設定ページへ移動
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> 設定ページへ移動
                     </button>
                 </div>
             `;
@@ -3861,9 +3861,9 @@ class App {
         const skillLevel = localStorage.getItem('playerSkillLevel') || 'intermediate';
 
         const skillInfo = {
-            'beginner': { icon: '🌱', name: '初心者', desc: '基本的なゲームメカニクスを学習中' },
-            'intermediate': { icon: '📊', name: '中級者', desc: 'バランスの取れたスキルレベル' },
-            'advanced': { icon: '🏆', name: '上級者', desc: '高度な戦略と技術を身につけている' }
+            'beginner': { icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>', name: '初心者', desc: '基本的なゲームメカニクスを学習中' },
+            'intermediate': { icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>', name: '中級者', desc: 'バランスの取れたスキルレベル' },
+            'advanced': { icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>', name: '上級者', desc: '高度な戦略と技術を身につけている' }
         };
 
         const info = skillInfo[skillLevel] || skillInfo.intermediate;
@@ -4177,7 +4177,7 @@ JSONのみを出力してください。`;
                     this.loadGoals(); // 目標ページも更新
 
                     // 自動でコーチングプランを生成
-                    console.log('🎯 コーチングプラン自動生成チェック:', {
+                    console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> コーチングプラン自動生成チェック:', {
                         hasCoachingPlanService: !!this.coachingPlanService,
                         hasGeminiService: !!window.geminiService,
                         isGeminiConfigured: window.geminiService?.isConfigured?.(),
@@ -4186,10 +4186,10 @@ JSONのみを出力してください。`;
 
                     if (newGoalIds.length > 0) {
                         if (!this.coachingPlanService) {
-                            console.warn('⚠️ coachingPlanServiceが初期化されていません');
+                            console.warn('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> coachingPlanServiceが初期化されていません');
                         }
                         if (!window.geminiService?.isConfigured?.()) {
-                            console.warn('⚠️ Gemini APIが設定されていません');
+                            console.warn('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが設定されていません');
                             this.showToast('コーチングプラン生成にはGemini APIキーが必要です', 'warning');
                         }
                     }
@@ -4201,7 +4201,7 @@ JSONのみを出力してください。`;
                             let plansCreated = 0;
                             for (const goalId of newGoalIds) {
                                 const goal = existingGoals.find(g => g.id === goalId);
-                                console.log(`📋 プラン生成中: ${goal?.title} (ID: ${goalId})`);
+                                console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> プラン生成中: ${goal?.title} (ID: ${goalId})`);
 
                                 if (goal && !goal.hasCoachingPlan) {
                                     try {
@@ -4217,12 +4217,12 @@ JSONのみを出力してください。`;
                                             goal.hasCoachingPlan = true;
                                             goal.planId = plan.id;
                                             plansCreated++;
-                                            console.log(`✅ プラン生成成功: ${goal.title}`);
+                                            console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> プラン生成成功: ${goal.title}`);
                                         } else {
-                                            console.warn(`⚠️ プラン生成失敗（null返却）: ${goal.title}`);
+                                            console.warn(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> プラン生成失敗（null返却）: ${goal.title}`);
                                         }
                                     } catch (planError) {
-                                        console.error(`❌ プラン生成エラー for goal ${goalId}:`, planError);
+                                        console.error(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> プラン生成エラー for goal ${goalId}:`, planError);
                                         this.showToast(`プラン生成失敗: ${planError.message}`, 'error');
                                     }
                                 }
@@ -4267,7 +4267,7 @@ JSONのみを出力してください。`;
                 goals[goalIndex].progress = progress;
                 localStorage.setItem('goals', JSON.stringify(goals));
                 this.loadDashboardGoals();
-                console.log(`🎯 Force updated "${title}" to ${progress}%`);
+                console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Force updated "${title}" to ${progress}%`);
                 return true;
             }
             return false;
@@ -4497,7 +4497,7 @@ JSONのみを出力してください。`;
             toggleKeyBtn.addEventListener('click', () => {
                 const isPassword = apiKeyInput.type === 'password';
                 apiKeyInput.type = isPassword ? 'text' : 'password';
-                toggleKeyBtn.textContent = isPassword ? '🙈' : '👁️';
+                toggleKeyBtn.textContent = isPassword ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
             });
         }
         
@@ -4657,7 +4657,7 @@ JSONのみを出力してください。`;
         
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar';
-        avatar.textContent = type === 'user' ? '👤' : '🤖';
+        avatar.textContent = type === 'user' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>';
         
         const content = document.createElement('div');
         content.className = 'message-content';
@@ -4700,7 +4700,7 @@ JSONのみを出力してください。`;
         indicator.id = 'typing-indicator';
         
         indicator.innerHTML = `
-            <div class="message-avatar">🤖</div>
+            <div class="message-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></div>
             <div class="message-content">
                 <div class="message-text">
                     <span>AI が入力中</span>
@@ -4926,7 +4926,7 @@ JSONのみを出力してください。`;
             const valorantGameData = {
                 id: 'valorant',
                 name: 'VALORANT',
-                icon: '🎯',
+                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
                 category: 'FPS'
             };
 
@@ -5158,17 +5158,17 @@ JSONのみを出力してください。`;
             beginner: {
                 name: '初心者',
                 description: '基本的なゲームメカニクスを学習中',
-                icon: '🌱'
+                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>'
             },
             intermediate: {
                 name: '中級者',
                 description: 'ゲームの基本は理解し、上達を目指している',
-                icon: '📊'
+                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
             },
             advanced: {
                 name: '上級者',
                 description: '高度な戦略と技術を身につけている',
-                icon: '🏆'
+                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>'
             }
         };
         return skillLevels[skillLevel] || skillLevels.intermediate;
@@ -5388,7 +5388,7 @@ JSONのみを出力してください。`;
             this.selectedGameData = {
                 id: 'valorant',
                 name: 'VALORANT',
-                icon: '🎯',
+                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
                 category: 'FPS'
             };
             this.selectedSkillLevel = null;
@@ -5542,7 +5542,7 @@ JSONのみを出力してください。`;
         this.selectedGameData = {
             id: 'valorant',
             name: 'VALORANT',
-            icon: '🎯',
+            icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
             category: 'FPS'
         };
 
@@ -5823,7 +5823,7 @@ JSONのみを出力してください。`;
             if (keyword) {
                 container.innerHTML = `
                     <div class="no-results-message">
-                        <div class="search-icon">🔍</div>
+                        <div class="search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
                         <h4>"${keyword}" に一致する履歴が見つかりませんでした</h4>
                         <p>別のキーワードで検索してみてください</p>
                     </div>
@@ -5863,7 +5863,7 @@ JSONのみを出力してください。`;
                 </div>
                 ${item.goalConnection ? `
                 <div class="history-item-goal">
-                    <strong>🎯 目標との関連:</strong> ${item.goalConnection}
+                    <strong><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 目標との関連:</strong> ${item.goalConnection}
                 </div>
                 ` : ''}
             `;
@@ -6090,14 +6090,14 @@ JSONのみを出力してください。`;
     updateFeedbackButtonText(button, isSelected) {
         const feedbackType = button.dataset.feedback;
         const originalTexts = {
-            helpful: '👍 役に立った',
-            too_easy: '😊 簡単すぎた',
+            helpful: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 役に立った',
+            too_easy: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> 簡単すぎた',
             too_hard: '😰 難しすぎた'
         };
         const selectedTexts = {
-            helpful: '✅ 役に立った',
-            too_easy: '✅ 簡単すぎた',
-            too_hard: '✅ 難しすぎた'
+            helpful: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 役に立った',
+            too_easy: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 簡単すぎた',
+            too_hard: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 難しすぎた'
         };
 
         if (isSelected) {
@@ -6130,21 +6130,21 @@ JSONのみを出力してください。`;
     async resetAppData() {
         // SweetAlert2を使用したリッチな確認ダイアログ
         const result = await Swal.fire({
-            title: '⚠️ データ初期化の確認',
+            title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> データ初期化の確認',
             html: `
                 <div style="text-align: left; margin: 20px 0;">
                     <p style="font-size: 16px; margin-bottom: 15px;">
                         アプリを初期化します。以下のデータが<strong>完全に削除</strong>されます:
                     </p>
                     <ul style="list-style: none; padding: 0;">
-                        <li style="padding: 8px 0;">🎮 保存された試合データ</li>
-                        <li style="padding: 8px 0;">🎯 設定した目標</li>
-                        <li style="padding: 8px 0;">🔑 APIキー設定</li>
-                        <li style="padding: 8px 0;">📊 すべての統計情報</li>
-                        <li style="padding: 8px 0;">⚙️ アプリケーション設定</li>
+                        <li style="padding: 8px 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg> 保存された試合データ</li>
+                        <li style="padding: 8px 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 設定した目標</li>
+                        <li style="padding: 8px 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> APIキー設定</li>
+                        <li style="padding: 8px 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> すべての統計情報</li>
+                        <li style="padding: 8px 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> アプリケーション設定</li>
                     </ul>
                     <p style="font-size: 14px; color: #e74c3c; margin-top: 15px; font-weight: bold;">
-                        ⚠️ この操作は取り消せません
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> この操作は取り消せません
                     </p>
                 </div>
             `,
@@ -6199,7 +6199,7 @@ JSONのみを出力してください。`;
 
             // 成功メッセージを表示してリロード
             await Swal.fire({
-                title: '✅ 初期化完了',
+                title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 初期化完了',
                 text: 'アプリケーションを初期化しました。ページを再読み込みします。',
                 icon: 'success',
                 timer: 2000,
@@ -6214,7 +6214,7 @@ JSONのみを出力してください。`;
             
             // エラーメッセージを表示
             await Swal.fire({
-                title: '❌ エラー',
+                title: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> エラー',
                 text: '初期化に失敗しました。ページを手動で再読み込みしてください。',
                 icon: 'error',
                 confirmButtonText: 'OK'
@@ -6224,7 +6224,7 @@ JSONのみを出力してください。`;
 
     // === ダッシュボード目標表示機能 ===
     initDashboardGoals() {
-        console.log('🎯 Initializing dashboard goals...');
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Initializing dashboard goals...');
 
         // 既存の目標データをチェック・修正
         this.checkAndFixGoalsData();
@@ -6304,7 +6304,7 @@ JSONのみを出力してください。`;
 
             if (dataFixed) {
                 localStorage.setItem('goals', JSON.stringify(fixedGoals));
-                console.log('🎯 Goals data has been fixed and saved');
+                console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Goals data has been fixed and saved');
             }
         } catch (error) {
             console.error('Error checking goals data:', error);
@@ -6316,7 +6316,7 @@ JSONのみを出力してください。`;
             const goalsData = localStorage.getItem('goals');
             let goals = goalsData ? JSON.parse(goalsData) : [];
 
-            console.log('🎯 Loading dashboard goals:', goals.length, 'goals found');
+            console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Loading dashboard goals:', goals.length, 'goals found');
 
             // データのクリーンアップは初期化時のみ実行（無限ループ防止）
             this.renderDashboardGoals(goals);
@@ -6329,7 +6329,7 @@ JSONのみを出力してください。`;
     renderDashboardGoals(goals) {
         const goalsList = document.getElementById('dashboard-goals-list');
         if (!goalsList) {
-            console.error('🎯 dashboard-goals-list element not found');
+            console.error('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> dashboard-goals-list element not found');
             return;
         }
 
@@ -6399,7 +6399,7 @@ JSONのみを出力してください。`;
 
         // デバッグ時のみログ出力
         if (window.DEBUG_GOALS) {
-            console.log(`🎯 Rendering "${goal.title}": ${progress}%`);
+            console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Rendering "${goal.title}": ${progress}%`);
         }
 
         return `
@@ -6444,7 +6444,7 @@ JSONのみを出力してください。`;
 
             // 作成日が未来の場合（データエラー）は作成日を今日に修正
             if (createdAt > now) {
-                console.warn(`⚠️ Goal "${goal.title}" has future createdAt, fixing to today`);
+                console.warn(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Goal "${goal.title}" has future createdAt, fixing to today`);
                 createdAt = now;
             }
 
@@ -6457,7 +6457,7 @@ JSONのみを出力してください。`;
 
             // デバッグ時のみ詳細ログ
             if (window.DEBUG_GOALS) {
-                console.log(`📅 Progress: "${goal.title}" = ${Math.round(progress)}% (${elapsedDays.toFixed(1)}/${totalDays.toFixed(1)} days)`);
+                console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Progress: "${goal.title}" = ${Math.round(progress)}% (${elapsedDays.toFixed(1)}/${totalDays.toFixed(1)} days)`);
             }
 
             return Math.round(progress);
@@ -6477,12 +6477,12 @@ JSONのみを出力してください。`;
         // LocalStorageの変更を監視（他のタブからの変更のみ）
         window.addEventListener('storage', (e) => {
             if (e.key === 'goals') {
-                console.log('🎯 Storage event detected from another tab');
+                console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Storage event detected from another tab');
                 this.loadDashboardGoals();
             }
         });
 
-        console.log('🎯 Goals storage listener setup completed');
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Goals storage listener setup completed');
     }
     
     updateNavigation(pageId) {
@@ -6537,7 +6537,7 @@ JSONのみを出力してください。`;
 
         listContainer.innerHTML = files.map(file => `
             <div class="data-source-item" data-filename="${file}">
-                <span class="file-icon">📄</span>
+                <span class="file-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></span>
                 <span class="file-name">${file}</span>
                 <div class="file-actions">
                     <button class="btn-secondary btn-sm view-file-btn">表示</button>
@@ -6838,7 +6838,7 @@ JSONのみを出力してください。`;
                 if (dataSize) dataSize.textContent = totalSize.toLocaleString();
                 if (kbDetails) kbDetails.classList.remove('hidden');
                 
-                console.log(`📚 Valorant知識ベース: ${datasourceKeys.length}ファイル、${totalSize}文字`);
+                console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Valorant知識ベース: ${datasourceKeys.length}ファイル、${totalSize}文字`);
             } else {
                 // データがない場合
                 if (statusText) statusText.textContent = '未設定';
@@ -6847,7 +6847,7 @@ JSONのみを出力してください。`;
                 if (dataSize) dataSize.textContent = '0';
                 if (kbDetails) kbDetails.classList.remove('hidden');
                 
-                console.log('📚 Valorant知識ベース: データなし');
+                console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Valorant知識ベース: データなし');
             }
         } catch (error) {
             console.error('知識ベース状態更新エラー:', error);
@@ -6860,7 +6860,7 @@ JSONのみを出力してください。`;
             const reloadBtn = document.getElementById('reload-kb-btn');
             if (reloadBtn) {
                 reloadBtn.disabled = true;
-                reloadBtn.textContent = '🔄';
+                reloadBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>';
                 reloadBtn.classList.add('spinning');
             }
             
@@ -6872,7 +6872,7 @@ JSONのみを出力してください。`;
             // 状態表示を更新
             this.updateValorantKnowledgeStatus();
             
-            this.showToast('📚 Valorant知識ベースを更新しました', 'success');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Valorant知識ベースを更新しました', 'success');
             
             setTimeout(() => {
                 if (reloadBtn) {
@@ -6927,12 +6927,12 @@ JSONのみを出力してください。`;
 
     // プランステップを表示
     showPlanStep(stepId) {
-        console.log('🔄 Switching to plan step:', stepId);
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Switching to plan step:', stepId);
 
         // 全ステップを非表示
         document.querySelectorAll('.plan-step').forEach(step => {
             step.classList.remove('active');
-            console.log('🔄 Removed active from step:', step.id);
+            console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Removed active from step:', step.id);
         });
 
         // 指定ステップを表示
@@ -6940,9 +6940,9 @@ JSONのみを出力してください。`;
         if (targetStep) {
             targetStep.classList.add('active');
             targetStep.classList.remove('hidden'); // hiddenクラスも削除
-            console.log('✅ Activated step:', stepId);
+            console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Activated step:', stepId);
         } else {
-            console.error('❌ Target step not found:', stepId);
+            console.error('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Target step not found:', stepId);
         }
     }
 
@@ -7039,7 +7039,7 @@ JSONのみを出力してください。`;
 
     // 生成されたプランを表示
     displayGeneratedPlan(plan) {
-        console.log('🎯 Displaying generated plan:', plan);
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Displaying generated plan:', plan);
 
         // プラン統計を表示
         const weeksEl = document.getElementById('plan-total-weeks');
@@ -7047,20 +7047,20 @@ JSONのみを出力してください。`;
 
         if (weeksEl) {
             weeksEl.textContent = plan.weeks.length;
-            console.log('📊 Set weeks count:', plan.weeks.length);
+            console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Set weeks count:', plan.weeks.length);
         } else {
-            console.error('❌ plan-total-weeks element not found');
+            console.error('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> plan-total-weeks element not found');
         }
 
         if (daysEl) {
             daysEl.textContent = plan.metadata.totalWeeks * 7;
-            console.log('📊 Set days count:', plan.metadata.totalWeeks * 7);
+            console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Set days count:', plan.metadata.totalWeeks * 7);
         } else {
-            console.error('❌ plan-total-days element not found');
+            console.error('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> plan-total-days element not found');
         }
 
         // 週別プランを表示
-        console.log('📅 Rendering week cards...');
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Rendering week cards...');
         this.renderWeekCards(plan.weeks);
         
         // グラウンディング情報を表示
@@ -7073,21 +7073,21 @@ JSONのみを出力してください。`;
     renderWeekCards(weeks) {
         const container = document.getElementById('weeks-container');
         if (!container) {
-            console.error('❌ weeks-container not found');
+            console.error('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> weeks-container not found');
             return;
         }
 
-        console.log('📅 Found weeks container, clearing content...');
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Found weeks container, clearing content...');
         container.innerHTML = '';
 
-        console.log('📅 Rendering', weeks.length, 'week cards...');
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Rendering', weeks.length, 'week cards...');
         weeks.forEach((week, index) => {
-            console.log(`📅 Creating week card ${index + 1}:`, week);
+            console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Creating week card ${index + 1}:`, week);
             const weekCard = this.createWeekCard(week);
             container.appendChild(weekCard);
         });
 
-        console.log('📅 Week cards rendered successfully');
+        console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Week cards rendered successfully');
     }
 
     // グラウンディング情報を表示
@@ -7101,7 +7101,7 @@ JSONのみを出力してください。`;
         sourcesCard.className = 'grounding-sources-card';
         sourcesCard.innerHTML = `
             <div class="sources-header">
-                <span class="sources-icon">🌐</span>
+                <span class="sources-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
                 <h4>参考にした最新情報（${groundingSources.totalSources}件）</h4>
             </div>
             <div class="sources-list">
@@ -7115,7 +7115,7 @@ JSONのみを出力してください。`;
                 `).join('')}
             </div>
             <p class="sources-note">
-                💡 このコーチングプランは、上記の最新情報を参考に生成されました
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg> このコーチングプランは、上記の最新情報を参考に生成されました
             </p>
         `;
 
@@ -7199,7 +7199,7 @@ JSONのみを出力してください。`;
             // ボタンを元に戻す
             if (approveBtn) {
                 approveBtn.disabled = false;
-                approveBtn.textContent = '✅ このプランで開始';
+                approveBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> このプランで開始';
             }
         }
     }
@@ -7254,7 +7254,7 @@ JSONのみを出力してください。`;
         if (plans.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
                     <h3>プランがありません</h3>
                     <p>目標ページでプランを作成してください</p>
                 </div>
@@ -7420,13 +7420,13 @@ JSONのみを出力してください。`;
             </div>
             <div class="week-content">
                 <div class="objectives-section">
-                    <h4>📋 今週の目標</h4>
+                    <h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> 今週の目標</h4>
                     <ul class="objectives-list">
                         ${currentWeek.objectives.map(obj => `<li>${obj}</li>`).join('')}
                     </ul>
                 </div>
                 <div class="milestones-section">
-                    <h4>🎯 達成指標</h4>
+                    <h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 達成指標</h4>
                     <ul class="milestones-list">
                         ${currentWeek.milestones.map(milestone => `<li>${milestone}</li>`).join('')}
                     </ul>
@@ -7511,7 +7511,7 @@ JSONのみを出力してください。`;
     completePlanFromDetail() {
         if (this.currentDetailPlanId) {
             if (this.coachingPlanService.updatePlanStatus(this.currentDetailPlanId, 'completed')) {
-                this.showToast('プランを完了しました🎉', 'success');
+                this.showToast('プランを完了しました<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/></svg>', 'success');
                 this.loadCoachingPlans();
                 // モーダルを更新
                 const plan = this.coachingPlanService.getPlan(this.currentDetailPlanId);
@@ -8073,7 +8073,7 @@ JSONのみを出力してください。`;
             galleryGrid?.classList.add('selection-mode');
             if (toggleBtn) {
                 toggleBtn.classList.add('active');
-                toggleBtn.innerHTML = '<span class="icon">✕</span> キャンセル';
+                toggleBtn.innerHTML = '<span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span> キャンセル';
             }
 
             // 各カードにチェックボックスを追加
@@ -8186,7 +8186,7 @@ JSONのみを出力してください。`;
         
         if (shiftKey && this.lastSelectedIndex !== -1 && this.lastSelectedIndex !== currentIndex) {
             // SHIFT+クリックで範囲選択
-            console.log('🎯 SHIFT範囲選択を実行');
+            console.log('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> SHIFT範囲選択を実行');
             this.selectRange(this.lastSelectedIndex, currentIndex, isChecked);
             // 範囲選択の場合、updateSelectionCountはselectRange内で呼ばれる
         } else {
@@ -8397,9 +8397,9 @@ JSONのみを出力してください。`;
         switch (result.toUpperCase()) {
             case 'WIN':
                 newStreak = currentStreak + 1;
-                console.log(`🔥 勝利！連勝記録を更新: ${currentStreak} → ${newStreak}`);
+                console.log(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> 勝利！連勝記録を更新: ${currentStreak} → ${newStreak}`);
                 if (newStreak > 1) {
-                    this.showToast(`🔥 ${newStreak}連勝中！`, 'success');
+                    this.showToast(`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> ${newStreak}連勝中！`, 'success');
                 }
                 break;
             case 'LOSS':
@@ -8460,17 +8460,17 @@ JSONのみを出力してください。`;
     // 初期マップデータ
     getDefaultMaps() {
         return [
-            { id: 'abyss', name: 'アビス', nameEn: 'Abyss', icon: '🕳️', enabled: true, isCustom: false },
-            { id: 'ascent', name: 'アセント', nameEn: 'Ascent', icon: '🏔️', enabled: true, isCustom: false },
+            { id: 'abyss', name: 'アビス', nameEn: 'Abyss', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="6"/></svg>', enabled: true, isCustom: false },
+            { id: 'ascent', name: 'アセント', nameEn: 'Ascent', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>', enabled: true, isCustom: false },
             { id: 'bind', name: 'バインド', nameEn: 'Bind', icon: '🚪', enabled: true, isCustom: false },
             { id: 'breeze', name: 'ブリーズ', nameEn: 'Breeze', icon: '🌴', enabled: true, isCustom: false },
-            { id: 'corrode', name: 'カロード', nameEn: 'Corrode', icon: '🏙️', enabled: true, isCustom: false },
+            { id: 'corrode', name: 'カロード', nameEn: 'Corrode', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="7" height="14"/><rect x="14" y="4" width="7" height="18"/><line x1="5" y1="11" x2="8" y2="11"/><line x1="5" y1="14" x2="8" y2="14"/><line x1="16" y1="8" x2="19" y2="8"/><line x1="16" y1="12" x2="19" y2="12"/></svg>', enabled: true, isCustom: false },
             { id: 'fracture', name: 'フラクチャー', nameEn: 'Fracture', icon: '⚡', enabled: true, isCustom: false },
-            { id: 'haven', name: 'ヘイヴン', nameEn: 'Haven', icon: '🏛️', enabled: true, isCustom: false },
-            { id: 'icebox', name: 'アイスボックス', nameEn: 'Icebox', icon: '❄️', enabled: true, isCustom: false },
+            { id: 'haven', name: 'ヘイヴン', nameEn: 'Haven', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/></svg>', enabled: true, isCustom: false },
+            { id: 'icebox', name: 'アイスボックス', nameEn: 'Icebox', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/></svg>', enabled: true, isCustom: false },
             { id: 'lotus', name: 'ロータス', nameEn: 'Lotus', icon: '🪷', enabled: true, isCustom: false },
             { id: 'pearl', name: 'パール', nameEn: 'Pearl', icon: '🦪', enabled: true, isCustom: false },
-            { id: 'split', name: 'スプリット', nameEn: 'Split', icon: '🏙️', enabled: true, isCustom: false },
+            { id: 'split', name: 'スプリット', nameEn: 'Split', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="7" height="14"/><rect x="14" y="4" width="7" height="18"/><line x1="5" y1="11" x2="8" y2="11"/><line x1="5" y1="14" x2="8" y2="14"/><line x1="16" y1="8" x2="19" y2="8"/><line x1="16" y1="12" x2="19" y2="12"/></svg>', enabled: true, isCustom: false },
             { id: 'sunset', name: 'サンセット', nameEn: 'Sunset', icon: '🌅', enabled: true, isCustom: false }
         ];
     }
@@ -8544,7 +8544,7 @@ JSONのみを出力してください。`;
             console.log('マップ設定を保存しました:', maps);
         } catch (error) {
             console.error('マップ設定の保存に失敗:', error);
-            this.showToast('❌ マップ設定の保存に失敗しました', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> マップ設定の保存に失敗しました', 'error');
         }
     }
 
@@ -8582,7 +8582,7 @@ JSONのみを出力してください。`;
         // アイコンプレビューをリセット
         const preview = document.getElementById('icon-preview');
         if (preview) {
-            preview.innerHTML = '<span class="preview-placeholder">🗺️</span>';
+            preview.innerHTML = '<span class="preview-placeholder"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>';
         }
     }
 
@@ -8641,7 +8641,7 @@ JSONのみを出力してください。`;
                 img.alt = map.name;
                 iconDisplay.appendChild(img);
             } else {
-                iconDisplay.textContent = map.icon || '🗺️';
+                iconDisplay.textContent = map.icon || '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>';
             }
 
             // マップ名
@@ -8662,7 +8662,7 @@ JSONのみを出力してください。`;
             if (map.isCustom) {
                 deleteBtn = document.createElement('button');
                 deleteBtn.className = 'map-delete-btn';
-                deleteBtn.innerHTML = '🗑️';
+                deleteBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
                 deleteBtn.title = '削除';
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -8706,7 +8706,7 @@ JSONのみを出力してください。`;
         
         this.saveMapSettings(filteredMaps);
         this.renderExistingMapsList();
-        this.showToast('✅ カスタムマップを削除しました', 'success');
+        this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> カスタムマップを削除しました', 'success');
     }
 
     // 新しいマップを追加
@@ -8715,7 +8715,7 @@ JSONのみを出力してください。`;
         const iconInput = document.getElementById('new-map-icon');
 
         if (!nameInput || !nameInput.value.trim()) {
-            this.showToast('❌ マップ名を入力してください', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> マップ名を入力してください', 'error');
             return;
         }
 
@@ -8726,7 +8726,7 @@ JSONのみを出力してください。`;
         const duplicate = maps.find(m => m.name.toLowerCase() === mapName.toLowerCase());
         
         if (duplicate) {
-            this.showToast('❌ この名前は既に使用されています', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> この名前は既に使用されています', 'error');
             return;
         }
 
@@ -8737,7 +8737,7 @@ JSONのみを出力してください。`;
         if (file) {
             // ファイルサイズチェック (2MB)
             if (file.size > 2 * 1024 * 1024) {
-                this.showToast('❌ 画像ファイルは2MB以下にしてください', 'error');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 画像ファイルは2MB以下にしてください', 'error');
                 return;
             }
 
@@ -8748,7 +8748,7 @@ JSONのみを出力してください。`;
                 this.addNewMap(mapName, iconData);
             };
             reader.onerror = () => {
-                this.showToast('❌ 画像の読み込みに失敗しました', 'error');
+                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 画像の読み込みに失敗しました', 'error');
             };
             reader.readAsDataURL(file);
         } else {
@@ -8765,7 +8765,7 @@ JSONのみを出力してください。`;
             id: `custom_${Date.now()}`,
             name: mapName,
             nameEn: mapName,
-            icon: '🗺️',
+            icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
             iconData: iconData,
             enabled: true,
             isCustom: true
@@ -8783,10 +8783,10 @@ JSONのみを出力してください。`;
 
         const preview = document.getElementById('icon-preview');
         if (preview) {
-            preview.innerHTML = '<span class="preview-placeholder">🗺️</span>';
+            preview.innerHTML = '<span class="preview-placeholder"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>';
         }
 
-        this.showToast('✅ 新しいマップを追加しました', 'success');
+        this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 新しいマップを追加しました', 'success');
     }
 
     // アイコンのプレビュー
@@ -8796,7 +8796,7 @@ JSONのみを出力してください。`;
 
         // ファイルサイズチェック
         if (file.size > 2 * 1024 * 1024) {
-            this.showToast('❌ 画像ファイルは2MB以下にしてください', 'error');
+            this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> 画像ファイルは2MB以下にしてください', 'error');
             return;
         }
 
@@ -8819,7 +8819,7 @@ JSONのみを出力してください。`;
         // マップ選択UIを再描画
         this.renderMapOptions();
         
-        this.showToast('✅ マップ設定を保存しました', 'success');
+        this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> マップ設定を保存しました', 'success');
     }
 
     // マップ選択肢を描画
@@ -9410,7 +9410,7 @@ ${matchStats.topMaps.map(m => `- ${m.map}: ${m.matches}試合 (勝率${m.winRate
         return baseModal + `
             <div style="margin-top: 20px; text-align: center;">
                 <button onclick="window.app.analyzeWithAICoaching()" class="btn-primary" style="width: 100%;">
-                    <span style="margin-right: 8px;">🤖</span>
+                    <span style="margin-right: 8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></span>
                     AI分析を依頼
                 </button>
             </div>
@@ -9466,10 +9466,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (apiKeyInput) {
                 if (apiKeyInput.type === 'password') {
                     apiKeyInput.type = 'text';
-                    toggleBtn.textContent = '🙈';
+                    toggleBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
                 } else {
                     apiKeyInput.type = 'password';
-                    toggleBtn.textContent = '👁️';
+                    toggleBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
                 }
             }
         });

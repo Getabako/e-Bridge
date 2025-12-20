@@ -1390,3 +1390,184 @@ input[type="checkbox"]:checked::after {
   color: var(--neon-pink);
   text-shadow: 0 0 10px rgba(255, 45, 106, 0.5);
 }
+
+/* ============================================
+   SVG Icon Styles - Replacing Emojis
+   ============================================ */
+.icon-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: middle;
+  margin-right: 0.3em;
+}
+
+.icon-svg svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+/* Icon color variations */
+.nav-icon .icon-svg svg {
+  stroke: var(--neon-cyan);
+}
+
+.nav-btn.active .nav-icon .icon-svg svg {
+  stroke: var(--neon-pink);
+  filter: drop-shadow(0 0 6px var(--neon-pink));
+}
+
+.card h3 .icon-svg svg {
+  stroke: var(--neon-cyan);
+  filter: drop-shadow(0 0 8px var(--neon-cyan));
+}
+
+.btn-primary .icon-svg svg {
+  stroke: #fff;
+}
+
+/* Streak icon special style */
+.streak-icon .icon-svg svg {
+  stroke: var(--neon-orange);
+  filter: drop-shadow(0 0 10px var(--neon-orange));
+  animation: firePulse 1s ease-in-out infinite;
+}
+
+@keyframes firePulse {
+  0%, 100% { filter: drop-shadow(0 0 10px var(--neon-orange)); }
+  50% { filter: drop-shadow(0 0 20px var(--neon-orange)) drop-shadow(0 0 30px var(--neon-pink)); }
+}
+
+/* ============================================
+   Decorative Image Sections
+   ============================================ */
+.decorative-banner {
+  width: 100%;
+  height: 200px;
+  margin: 2rem 0;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 45, 106, 0.1));
+  border: 1px solid rgba(0, 245, 255, 0.3);
+}
+
+.decorative-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.decorative-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(10, 10, 30, 0.8) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decorative-banner .banner-text {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Small decorative images between sections */
+.section-divider {
+  width: 100%;
+  height: 80px;
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+}
+
+.section-divider img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 1rem;
+  border: 2px solid var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+}
+
+/* Loading placeholder for AI images */
+.ai-image-loading {
+  background: linear-gradient(90deg,
+    rgba(0, 245, 255, 0.1) 0%,
+    rgba(255, 45, 106, 0.2) 50%,
+    rgba(0, 245, 255, 0.1) 100%);
+  background-size: 200% 100%;
+  animation: imageLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes imageLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Visual break cards */
+.visual-break-card {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), rgba(191, 0, 255, 0.05));
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.visual-break-card .visual-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(0, 245, 255, 0.3);
+}
+
+.visual-break-card .visual-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.visual-break-card .visual-content {
+  flex: 1;
+}
+
+.visual-break-card .visual-content h4 {
+  color: var(--neon-cyan);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.visual-break-card .visual-content p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
