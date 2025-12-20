@@ -1,0 +1,58 @@
+name: Fetch Valorant Stats
+
+on:
+  # 手動実行
+  workflow_dispatch:
+    inputs:
+      riot_name:
+        description: 'Riot ID (名前部分)'
+        required: false
+        default: 'ykun'
+      riot_tag:
+        description: 'Riot Tag (タグ部分)'
+        required: false
+        default: '1672'
+  # 定期実行（毎日午前9時 JST = UTC 0時）
+  schedule:
+    - cron: '0 0 * * *'
+  # プッシュ時も実行（テスト用）
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/fetch-valorant-stats.js'
+      - '.github/workflows/valorant-stats.yml'
+
+jobs:
+  fetch-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Fetch Valorant Stats
+        env:
+          HENRIK_API_KEY: ${{ secrets.HENRIK_API_KEY }}
+          RIOT_NAME: ${{ github.event.inputs.riot_name || 'ykun' }}
+          RIOT_TAG: ${{ github.event.inputs.riot_tag || '1672' }}
+          RIOT_REGION: 'ap'
+        run: node scripts/fetch-valorant-stats.js
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/
+          git diff --staged --quiet || git commit -m "Update Valorant stats - $(date +'%Y-%m-%d %H:%M:%S')"
+          git push

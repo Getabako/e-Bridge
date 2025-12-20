@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Win Rate Chart Test - 100% Display Fix</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .chart-container {
+            background: #0f1924;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        h2 {
+            color: #e94560;
+        }
+        .info {
+            background: rgba(233, 69, 96, 0.1);
+            border-left: 3px solid #e94560;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Win Rate Chart - 100% Display Test</h1>
+        
+        <div class="info">
+            <h3>✅ Fix Applied</h3>
+            <p>Changed from <code>max: 100</code> to <code>suggestedMax: 105</code></p>
+            <p>This ensures that 100% win rate points are properly visible with padding above them.</p>
+        </div>
+
+        <div class="chart-container">
+            <h2>Before Fix (max: 100)</h2>
+            <canvas id="chart-before" width="400" height="200"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>After Fix (suggestedMax: 105)</h2>
+            <canvas id="chart-after" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Test data with 100% win rate
+        const testData = {
+            labels: ['50-40試合前', '40-30試合前', '30-20試合前', '20-10試合前', '直近10試合'],
+            winRates: [60, 75, 90, 95, 100]
+        };
+
+        // Before fix: max: 100
+        const ctxBefore = document.getElementById('chart-before').getContext('2d');
+        new Chart(ctxBefore, {
+            type: 'line',
+            data: {
+                labels: testData.labels,
+                datasets: [{
+                    label: '勝率',
+                    data: testData.winRates,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                layout: {
+                    padding: {
+                        top: 10,
+                        bottom: 20,
+                        left: 10,
+                        right: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#fff',
+                            font: { size: 13, weight: '600' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return `勝率: ${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,  // PROBLEM: 100% point at edge
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            color: '#aaa',
+                            font: { size: 12 }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        title: {
+                            display: true,
+                            text: '勝率 (%)',
+                            color: '#fff',
+                            font: { size: 13, weight: '600' }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#aaa',
+                            maxRotation: 0,
+                            minRotation: 0,
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // After fix: suggestedMax: 105
+        const ctxAfter = document.getElementById('chart-after').getContext('2d');
+        new Chart(ctxAfter, {
+            type: 'line',
+            data: {
+                labels: testData.labels,
+                datasets: [{
+                    label: '勝率',
+                    data: testData.winRates,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2,
+                layout: {
+                    padding: {
+                        top: 10,
+                        bottom: 20,
+                        left: 10,
+                        right: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#fff',
+                            font: { size: 13, weight: '600' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return `勝率: ${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: 105,  // FIX: Padding above 100%
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            color: '#aaa',
+                            font: { size: 12 },
+                            stepSize: 20
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        title: {
+                            display: true,
+                            text: '勝率 (%)',
+                            color: '#fff',
+                            font: { size: 13, weight: '600' }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#aaa',
+                            maxRotation: 0,
+                            minRotation: 0,
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

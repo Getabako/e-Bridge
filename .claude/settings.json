@@ -1,0 +1,93 @@
+{
+  "project": {
+    "name": "e-Bridge",
+    "description": "吃音・不登校経験・発達特性のある小中高生向けの教育支援サービス",
+    "version": "1.0.0"
+  },
+  "agents": {
+    "coding": {
+      "name": "コーディングエージェント",
+      "command": "/coding",
+      "description": "フロントエンド/バックエンドのコード実装を担当",
+      "skills": ["accessibility", "brand-guidelines"]
+    },
+    "image-gen": {
+      "name": "画像生成エージェント",
+      "command": "/image-gen",
+      "description": "画像生成AIへのプロンプト作成を担当",
+      "skills": ["brand-guidelines"]
+    },
+    "design": {
+      "name": "デザインエージェント",
+      "command": "/design",
+      "description": "ページデザイン・UI/UX設計を担当",
+      "skills": ["brand-guidelines", "accessibility", "personas"]
+    },
+    "backend": {
+      "name": "バックエンドエージェント",
+      "command": "/backend",
+      "description": "サーバーサイド・API実装を担当",
+      "skills": ["accessibility"]
+    },
+    "debug": {
+      "name": "デバッグエージェント",
+      "command": "/debug",
+      "description": "テスト・デバッグ・品質保証を担当",
+      "skills": ["accessibility"]
+    },
+    "persona": {
+      "name": "ペルソナ評価エージェント",
+      "command": "/persona",
+      "description": "ターゲットユーザー視点での評価を担当",
+      "skills": ["personas", "brand-guidelines"]
+    },
+    "evaluate": {
+      "name": "事業評価エージェント",
+      "command": "/evaluate",
+      "description": "SEO・コンバージョン・事業観点での評価を担当",
+      "skills": ["brand-guidelines"]
+    }
+  },
+  "workflow": {
+    "main": "/dev",
+    "phases": [
+      {
+        "name": "設計",
+        "agents": ["/design", "/image-gen"]
+      },
+      {
+        "name": "実装",
+        "agents": ["/backend", "/coding"]
+      },
+      {
+        "name": "品質保証",
+        "agents": ["/debug"]
+      },
+      {
+        "name": "評価",
+        "agents": ["/persona", "/evaluate"]
+      }
+    ]
+  },
+  "qualityGates": {
+    "debug": {
+      "description": "全テスト合格",
+      "required": true
+    },
+    "persona": {
+      "description": "各ペルソナ40点以上（50点満点）",
+      "threshold": 40,
+      "maxScore": 50
+    },
+    "evaluate": {
+      "description": "総合70点以上（100点満点）",
+      "threshold": 70,
+      "maxScore": 100
+    }
+  },
+  "designRules": {
+    "forbiddenColors": ["#9C27B0", "#7B1FA2", "#673AB7"],
+    "forbiddenPatterns": ["紫色グラデーション", "ネオン", "サイバーパンク", "AI風"],
+    "requiredAccessibility": "WCAG-AA"
+  }
+}

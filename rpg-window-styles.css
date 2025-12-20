@@ -1,0 +1,836 @@
+/* rpg-window-styles.css */
+/* モダンウィンドウスタイル - スムーズアニメーション付き */
+
+/* ============================================
+   アニメーション定義
+   ============================================ */
+
+@keyframes windowFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translate(-50%, -60%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   コンテナ - スムーズフェードイン
+   ============================================ */
+
+.rpg-window-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    pointer-events: none;
+    
+    /* 背景オーバーレイ - スムーズフェード */
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s ease;
+    backdrop-filter: blur(0px);
+}
+
+.rpg-window-container:empty {
+    /* ウィンドウが無い時は完全に透明 */
+    background-color: transparent;
+    pointer-events: none;
+    backdrop-filter: blur(0px);
+}
+
+.rpg-window-container:not(:empty) {
+    /* ウィンドウがある時はスムーズに表示 */
+    pointer-events: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    animation: overlayFadeIn 0.3s ease;
+}
+
+/* ============================================
+   ウィンドウ本体 - モダンデザイン
+   ============================================ */
+
+.rpg-window {
+    position: absolute;
+    pointer-events: auto;
+    
+    /* スムーズなアニメーション */
+    animation: windowFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* トランジション */
+    transition: all 0.3s ease;
+    
+    /* 影効果 */
+    filter: drop-shadow(0 20px 60px rgba(0, 0, 0, 0.5));
+}
+
+/* ============================================
+   ウィンドウの枠線 - モダンデザイン
+   ============================================ */
+
+.rpg-window-border {
+    width: 100%;
+    height: 100%;
+    
+    /* モダンなボーダー */
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* グラスモーフィズム背景 */
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.95) 0%,
+        rgba(30, 41, 59, 0.92) 100%
+    );
+    backdrop-filter: blur(20px) saturate(150%);
+    
+    /* 影効果 */
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 0 100px rgba(59, 130, 246, 0.1);
+    
+    /* トランジション */
+    transition: all 0.3s ease;
+}
+
+.rpg-window-border:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 
+        0 12px 48px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(59, 130, 246, 0.2) inset,
+        0 0 120px rgba(59, 130, 246, 0.15);
+}
+
+/* ============================================
+   ヘッダー - タイトルバー
+   ============================================ */
+
+.rpg-window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    
+    /* モダンなヘッダー背景 */
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.15) 0%,
+        rgba(37, 99, 235, 0.1) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px 16px 0 0;
+    position: relative;
+}
+
+.rpg-window-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(59, 130, 246, 0.5) 50%,
+        transparent 100%
+    );
+}
+
+.rpg-window-title {
+    /* モダンなフォント */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+    
+    /* グラデーション効果 */
+    background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================
+   閉じるボタン - モダンデザイン
+   ============================================ */
+
+.rpg-window-close {
+    width: 36px;
+    height: 36px;
+    
+    /* モダンなボタン背景 */
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    
+    /* テキスト */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #ef4444;
+    
+    /* クリック可能 */
+    cursor: pointer;
+    
+    /* トランジション */
+    transition: all 0.2s ease;
+    
+    /* フレックス配置 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rpg-window-close:hover {
+    /* ホバー時 */
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: scale(1.05) rotate(90deg);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.rpg-window-close:active {
+    /* クリック時 */
+    transform: scale(0.95) rotate(90deg);
+    background: rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================
+   コンテンツエリア
+   ============================================ */
+
+.rpg-window-content {
+    padding: 28px;
+    
+    /* モダンなテキストスタイル */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #e2e8f0;
+    
+    /* スクロール可能 */
+    overflow-y: auto;
+    max-height: calc(100% - 80px);
+    
+    /* スクロールバー - モダン */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(15, 23, 42, 0.5);
+}
+
+.rpg-window-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.rpg-window-content::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
+}
+
+.rpg-window-content::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.rpg-window-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
+}
+
+/* ============================================
+   スタッツ表示用のスタイル
+   ============================================ */
+
+.rpg-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.rpg-stat-item {
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.1) 0%,
+        rgba(37, 99, 235, 0.05) 100%
+    );
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    
+    /* トランジション */
+    transition: all 0.3s ease;
+    
+    /* ホバー時の動き */
+    cursor: default;
+}
+
+.rpg-stat-item:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.15) 0%,
+        rgba(37, 99, 235, 0.08) 100%
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.rpg-stat-label {
+    display: block;
+    font-size: 13px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.rpg-stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+/* ============================================
+   KDA表示用の特別スタイル
+   ============================================ */
+
+.rpg-kda-section {
+    background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.1) 0%,
+        rgba(5, 150, 105, 0.05) 100%
+    );
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 24px 0;
+    text-align: center;
+    
+    /* トランジション */
+    transition: all 0.3s ease;
+    
+    /* 影 */
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.1);
+}
+
+.rpg-kda-section:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+    transform: translateY(-2px);
+}
+
+.rpg-kda-title {
+    font-size: 14px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.rpg-kda-values {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.rpg-kda-separator {
+    color: #64748b;
+    font-size: 32px;
+    font-weight: 300;
+}
+
+/* ============================================
+   レスポンシブ対応
+   ============================================ */
+
+@media (max-width: 768px) {
+    .rpg-window {
+        width: 95% !important;
+        left: 2.5% !important;
+        transform: translateX(0) !important;
+    }
+    
+    .rpg-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .rpg-window-title {
+        font-size: 14px;
+    }
+    
+    .rpg-window-content {
+        font-size: 14px;
+    }
+}
+
+/* ============================================
+   アクセシビリティ
+   ============================================ */
+
+.rpg-window:focus-within {
+    outline: 4px solid #ffff00;
+    outline-offset: 4px;
+}
+
+/* ============================================
+   特殊効果 - 瞬時切り替え専用
+   ============================================ */
+
+.rpg-window-highlight {
+    /* 強調表示 - 瞬時切り替え */
+    border-color: #ffff00 !important;
+}
+
+.rpg-window-dimmed {
+    /* 暗転表示 - 瞬時切り替え */
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+/* ============================================
+   フォーム内のウィンドウカード
+   ============================================ */
+
+.window-card {
+    border-radius: 16px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.6) 0%,
+        rgba(30, 41, 59, 0.5) 100%
+    );
+    backdrop-filter: blur(12px) saturate(120%);
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 0 40px rgba(59, 130, 246, 0.05);
+    margin-bottom: 24px;
+    overflow: hidden;
+    
+    /* アニメーション */
+    animation: windowCardSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s ease;
+}
+
+@keyframes windowCardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.window-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(59, 130, 246, 0.1) inset,
+        0 0 60px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.window-card-header {
+    padding: 16px 24px;
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.12) 0%,
+        rgba(37, 99, 235, 0.08) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+}
+
+.window-card-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(59, 130, 246, 0.4) 50%,
+        transparent 100%
+    );
+}
+
+.window-card-header h4 {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #e2e8f0;
+    letter-spacing: 0.3px;
+}
+
+.window-card-content {
+    padding: 24px;
+}
+
+/* スコア入力のスタイル調整 */
+.window-card .score-inputs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.window-card .score-input-group {
+    flex: 1;
+    max-width: 200px;
+}
+
+.window-card .score-input-group label {
+    display: block;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.window-card .score-input-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    color: #3b82f6;
+    transition: all 0.2s ease;
+}
+
+.window-card .score-input-group input:focus {
+    outline: none;
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.window-card .score-separator {
+    font-size: 32px;
+    font-weight: 300;
+    color: #64748b;
+    margin: 0 8px;
+}
+
+/* KDA入力のスタイル調整 */
+.window-card .kda-inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 32px;
+}
+
+.window-card .kda-input-group {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.window-card .kda-input-group label {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.window-card .kda-input-group input {
+    width: 100%;
+    padding: 14px;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    color: #10b981;
+    transition: all 0.2s ease;
+}
+
+.window-card .kda-input-group input:focus {
+    outline: none;
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.window-card .kda-separator {
+    font-size: 28px;
+    font-weight: 300;
+    color: #64748b;
+}
+
+/* スタッツグリッドのスタイル調整 */
+.window-card .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.window-card .stat-input-group {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+}
+
+.window-card .stat-input-group:hover {
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.window-card .stat-input-group label {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.window-card .stat-input-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 8px;
+    color: #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.window-card .stat-input-group input:focus {
+    outline: none;
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* テンキー入力のスタイル */
+.tenkey-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 12px;
+    width: 220px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tenkey-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.tenkey-btn {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.15) 0%,
+        rgba(37, 99, 235, 0.1) 100%
+    );
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    color: #e2e8f0;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tenkey-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tenkey-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.3) 0%,
+        rgba(37, 99, 235, 0.2) 100%
+    );
+    border-color: rgba(59, 130, 246, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.tenkey-btn:hover::before {
+    opacity: 1;
+}
+
+.tenkey-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* クリアボタン（C） */
+.tenkey-clear {
+    background: linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.15) 0%,
+        rgba(220, 38, 38, 0.1) 100%
+    ) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #fca5a5;
+}
+
+.tenkey-clear:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.3) 0%,
+        rgba(220, 38, 38, 0.2) 100%
+    ) !important;
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* 数字ボタン */
+.tenkey-number:active {
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.5) 0%,
+        rgba(37, 99, 235, 0.3) 100%
+    );
+    box-shadow: 
+        0 0 20px rgba(59, 130, 246, 0.6),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* KDAセクション用の緑系テンキー */
+.kda-section .tenkey-btn {
+    background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.15) 0%,
+        rgba(5, 150, 105, 0.1) 100%
+    );
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.kda-section .tenkey-btn:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.3) 0%,
+        rgba(5, 150, 105, 0.2) 100%
+    );
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.kda-section .tenkey-number:active {
+    background: linear-gradient(
+        135deg,
+        rgba(16, 185, 129, 0.5) 0%,
+        rgba(5, 150, 105, 0.3) 100%
+    );
+    box-shadow: 
+        0 0 20px rgba(16, 185, 129, 0.6),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 入力フィールドの読み取り専用スタイル */
+.window-card input[readonly] {
+    cursor: default;
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(59, 130, 246, 0.2);
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.window-card input[readonly]:focus {
+    box-shadow: none;
+}
+
+/* ============================================
+   デバッグ用
+   ============================================ */
+
+.rpg-window[data-debug="true"] {
+    outline: 4px dashed #ff00ff;
+    outline-offset: 8px;
+}
+
+.rpg-window[data-debug="true"]::before {
+    content: 'DEBUG MODE';
+    position: absolute;
+    top: -30px;
+    left: 0;
+    background-color: #ff00ff;
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: bold;
+}

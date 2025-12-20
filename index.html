@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Error Suppressor for Chrome Extension Communication Errors -->
+    <!-- This must be loaded first to catch all errors -->
+    <script src="error-suppressor.js"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Bridge - eSports Performance Bridge</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="favicon.svg">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="valorant-styles.css">
+    <!-- SweetAlert2 for rich confirmation dialogs -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="player-stats.js"></script>
+    
+    <!-- RPG Window System -->
+    <link rel="stylesheet" href="rpg-window-styles.css">
+
+    <!-- Cyberpunk Enhancement - Ultimate Gaming Aesthetic -->
+    <link rel="stylesheet" href="cyberpunk-enhance.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>e-Bridge</h1>
+                </div>
+                <nav class="nav">
+                    <button class="nav-btn active" data-page="dashboard">
+                        <span class="nav-icon">📊</span>
+                        ダッシュボード
+                    </button>
+                    <button class="nav-btn" data-page="goals">
+                        <span class="nav-icon">🎯</span>
+                        目標
+                    </button>
+                    <button class="nav-btn" data-page="coaching-plans">
+                        <span class="nav-icon">📋</span>
+                        コーチングプラン
+                    </button>
+                    <button class="nav-btn" data-page="settings">
+                        <span class="nav-icon">⚙️</span>
+                        設定
+                    </button>
+                </nav>
+                <div class="user-actions">
+                    <div class="user-status" id="user-status">
+                        <span class="user-name" id="header-user-name">ゲストユーザー</span>
+                        <span class="user-type" id="user-type-indicator">ゲスト</span>
+                    </div>
+                    <div class="theme-toggle">
+                        <button id="theme-toggle-btn" class="theme-btn">🌙</button>
+                    </div>
+                    <div class="user-menu">
+                        <button id="logout-btn" class="logout-btn" title="ログアウト">👤</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="page-header">
+                    <h2>🎯 VALORANT ダッシュボード</h2>
+                    <p>VALORANT プレイヤーパフォーマンス概要</p>
+                </div>
+
+                <!-- Win Streak Display -->
+                <div class="win-streak-banner" id="win-streak-banner">
+                    <div class="streak-content">
+                        <span class="streak-icon">🔥</span>
+                        <div class="streak-info">
+                            <span class="streak-label">現在の連勝</span>
+                            <span class="streak-value" id="current-win-streak">0</span>
+                            <span class="streak-unit">連勝</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Charts -->
+                <div class="charts-grid">
+                    <!-- Win Rate Trend Chart -->
+                    <div class="card chart-card">
+                        <div class="chart-header">
+                            <h3>📈 勝率の推移</h3>
+                            <button class="btn-text" id="show-winrate-detail-btn" title="詳細を表示">
+                                📊 詳しく見る
+                            </button>
+                        </div>
+                        <canvas id="performance-chart"></canvas>
+                    </div>
+
+                    <!-- Challenge Points Card -->
+                    <div class="card challenge-points-card">
+                        <div class="chart-header">
+                            <h3>🎯 改善ポイント</h3>
+                        </div>
+                        <div id="challenge-points-content" class="challenge-points-content">
+                            <p class="no-data-message">📝 記録しよう！</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Gallery -->
+                <div class="card gallery-card">
+                    <div class="gallery-header">
+                        <h3>🎮 戦績ギャラリー</h3>
+                        <button class="btn-text" id="toggle-gallery-filters">
+                            🔍 絞り込み・検索
+                        </button>
+                    </div>
+
+                    <!-- Gallery Filters -->
+                    <div class="gallery-filters" id="gallery-filters" style="display: none;">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label>対戦相手</label>
+                                <select id="gallery-opponent-filter">
+                                    <option value="">すべて</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>勝敗</label>
+                                <select id="gallery-result-filter">
+                                    <option value="">すべて</option>
+                                    <option value="WIN">勝ち</option>
+                                    <option value="LOSS">負け</option>
+                                    <option value="DRAW">引き分け</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>気づきタグ</label>
+                                <input type="text" id="gallery-tag-filter" placeholder="タグで検索...">
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn-secondary btn-small" id="apply-gallery-filters">絞り込み</button>
+                            <button class="btn-text btn-small" id="clear-gallery-filters">クリア</button>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    <div id="gallery-grid" class="gallery-grid">
+                        <div class="no-matches-message">
+                            <p class="message-text">戦績を読み込み中...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Coaching Card -->
+                <div class="card coaching-card" id="daily-coaching-card">
+                    <div class="coaching-header">
+                        <h3>🎯 今日のコーチング</h3>
+                        <div class="coaching-header-actions">
+                            <button id="history-button" class="btn-text history-btn">📜 履歴</button>
+                            <span class="coaching-date" id="coaching-date">今日</span>
+                        </div>
+                    </div>
+
+                    <div class="coaching-content" id="coaching-content">
+                        <div class="coaching-headline">
+                            <h4 id="coaching-headline">コーチングを準備中...</h4>
+                        </div>
+
+                        <div class="coaching-core-content">
+                            <p id="coaching-core-content">ゲームを選択してスキルレベルを設定すると、パーソナライズされたコーチングアドバイスが表示されます。</p>
+                        </div>
+
+                        <div class="coaching-practical-step">
+                            <div class="step-label">今日試してみよう</div>
+                            <p id="coaching-practical-step">設定を完了して、今日のアドバイスを受け取りましょう！</p>
+                        </div>
+
+                        <!-- Goal Connection (目標との関連) -->
+                        <div class="coaching-goal-connection" id="coaching-goal-connection-container" style="display: none;">
+                            <div class="goal-connection-label">🎯 目標達成への貢献</div>
+                            <p id="coaching-goal-connection">目標達成への関連性が表示されます</p>
+                        </div>
+                    </div>
+
+                    <div class="coaching-actions">
+                        <div class="coaching-feedback" id="coaching-feedback">
+                            <span class="feedback-label">このアドバイスは役に立ちましたか？</span>
+                            <div class="feedback-buttons">
+                                <button class="feedback-btn helpful" data-feedback="helpful">
+                                    👍 役に立った
+                                </button>
+                                <button class="feedback-btn easy" data-feedback="too_easy">
+                                    😊 簡単すぎた
+                                </button>
+                                <button class="feedback-btn hard" data-feedback="too_hard">
+                                    😅 難しすぎた
+                                </button>
+                            </div>
+
+                            <!-- コメント機能エリア -->
+                            <div class="feedback-comment-section" id="feedback-comment-section" style="display: none;">
+                                <div class="comment-header">
+                                    <label for="feedback-comment">💬 詳細なフィードバック（任意）</label>
+                                    <span class="comment-helper">明日のコーチングに反映されます</span>
+                                </div>
+                                <textarea
+                                    id="feedback-comment"
+                                    placeholder="例：エイム練習をもっと詳しく教えて欲しい、戦略的な判断について学びたい、など具体的な要望を入力してください"
+                                    rows="3"
+                                    maxlength="500"></textarea>
+                                <div class="comment-actions">
+                                    <button class="submit-feedback-btn" id="submit-feedback-btn" disabled>
+                                        フィードバックを送信
+                                    </button>
+                                    <button class="cancel-feedback-btn" id="cancel-feedback-btn">
+                                        キャンセル
+                                    </button>
+                                </div>
+                                <div class="comment-counter">
+                                    <span id="comment-char-count">0</span>/500文字
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="coaching-progress" id="coaching-progress">
+                            <div class="progress-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="continuous-days">0</span>
+                                    <span class="stat-label">日継続</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="total-lessons">0</span>
+                                    <span class="stat-label">レッスン完了</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Goals -->
+                <div class="card dashboard-goals" id="dashboard-goals">
+                    <div class="goals-header">
+                        <h3>🎯 現在の目標</h3>
+                        <button class="view-all-goals" id="view-all-goals">すべて見る</button>
+                    </div>
+                    <div class="dashboard-goals-list" id="dashboard-goals-list">
+                        <div class="no-goals-message">
+                            <h4>目標が設定されていません</h4>
+                            <p>パフォーマンス向上のための目標を設定しましょう</p>
+                            <button class="add-goal-btn" id="add-first-goal">最初の目標を追加</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Goals Page -->
+            <div id="goals" class="page">
+                <div class="page-header">
+                    <h2>目標管理</h2>
+                    <p>短期・長期目標の設定と進捗管理</p>
+                </div>
+
+                <!-- Add Goal Form -->
+                <div class="card centered-button-card">
+                    <h3>新しい目標を作成</h3>
+                    <p class="subtitle">AIがあなたの目標達成をサポートする計画を作成します</p>
+                    <div class="centered-button-wrapper" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        <button type="button" id="auto-generate-goals-btn" class="btn-primary btn-large">🤖 戦績から目標を自動策定</button>
+                    </div>
+                </div>
+
+                <!-- Goals List -->
+                <div class="card">
+                    <h3>現在の目標</h3>
+                    <div id="goals-list" class="goals-list">
+                        <!-- Goals will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Coaching Plan Modal -->
+                <div id="coaching-plan-modal" class="modal hidden">
+                    <div class="modal-content coaching-plan-modal">
+                        <div class="modal-header">
+                            <h3>📋 コーチングプラン作成（Valorant最適化版）</h3>
+                            <button class="modal-close" id="close-plan-modal">&times;</button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- VALORANT Knowledge Base Status -->
+                            <div class="valorant-knowledge-status" id="valorant-knowledge-status">
+                                <div class="knowledge-indicator">
+                                    <span class="indicator-icon">📚</span>
+                                    <div class="indicator-text">
+                                        <span class="indicator-label">VALORANT知識ベース:</span>
+                                        <span class="indicator-value" id="kb-status-text">確認中...</span>
+                                    </div>
+                                    <button class="btn-icon" id="reload-kb-btn" title="知識ベースを再読み込み">
+                                        🔄
+                                    </button>
+                                </div>
+                                <div class="knowledge-details hidden" id="kb-details">
+                                    <div class="kb-info">
+                                        <span>📄 ファイル数: <strong id="kb-file-count">0</strong></span>
+                                        <span>📊 データサイズ: <strong id="kb-data-size">0</strong>文字</span>
+                                    </div>
+                                    <p class="kb-help-text">
+                                        💡 データソースページでVALORANT攻略資料をアップロードすると、より精度の高いプランが生成されます
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Plan Generation Step -->
+                            <div id="plan-generation-step" class="plan-step">
+                                <div class="plan-summary">
+                                    <h4>目標情報を入力</h4>
+                                    <form id="modal-goal-form" class="modal-goal-form">
+                                        <div class="form-group">
+                                            <label for="modal-goal-title-input">目標タイトル <span class="required">*</span></label>
+                                            <input type="text" id="modal-goal-title-input" placeholder="例：ダイヤモンドランク到達" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modal-goal-deadline-input">期限 <span class="required">*</span></label>
+                                            <input type="date" id="modal-goal-deadline-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modal-goal-description-input">詳細説明（任意）</label>
+                                            <textarea id="modal-goal-description-input" rows="3" placeholder="目標の詳細や達成したいことを記入してください"></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="plan-generation">
+                                    <div class="generation-status hidden" id="generation-status">
+                                        <div class="valorant-loader">
+                                            <div class="loader-ring outer"></div>
+                                            <div class="loader-ring inner"></div>
+                                            <div class="loader-icon">V</div>
+                                        </div>
+                                        <div class="loading-text glitch" data-text="コーチングプランを構築中...">コーチングプランを構築中...</div>
+                                        <div class="loading-steps-container">
+                                            <ul id="loading-steps-list">
+                                                <!-- Steps will be injected here -->
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="generation-buttons" id="generation-buttons">
+                                        <button id="generate-plan-btn" class="btn-primary">🤖 AIでプラン生成</button>
+                                        <button id="manual-plan-btn" class="btn-secondary">✏️ 手動でプラン作成</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Plan Review Step -->
+                            <div id="plan-review-step" class="plan-step hidden">
+                                <div class="plan-preview">
+                                    <h4>生成されたコーチングプラン</h4>
+                                    <div class="plan-overview">
+                                        <div class="plan-stats">
+                                            <div class="plan-stat">
+                                                <span class="stat-number" id="plan-total-weeks">0</span>
+                                                <span class="stat-label">週間</span>
+                                            </div>
+                                            <div class="plan-stat">
+                                                <span class="stat-number" id="plan-total-days">0</span>
+                                                <span class="stat-label">日間</span>
+                                            </div>
+                                            <div class="plan-stat">
+                                                <span class="stat-number">60</span>
+                                                <span class="stat-label">分/日</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="weeks-container" id="weeks-container">
+                                        <!-- 週別プランが表示される -->
+                                    </div>
+                                </div>
+
+                                <div class="plan-actions">
+                                    <button id="edit-plan-btn" class="btn-secondary">✏️ プランを編集</button>
+                                    <button id="approve-plan-btn" class="btn-primary">✅ このプランで開始</button>
+                                    <button id="regenerate-plan-btn" class="btn-outline">🔄 再生成</button>
+                                </div>
+                            </div>
+
+                            <!-- Plan Edit Step -->
+                            <div id="plan-edit-step" class="plan-step hidden">
+                                <div class="plan-editor">
+                                    <h4>プラン編集</h4>
+                                    <div class="edit-weeks-container" id="edit-weeks-container">
+                                        <!-- 編集可能な週別プラン -->
+                                    </div>
+                                </div>
+
+                                <div class="edit-actions">
+                                    <button id="save-plan-btn" class="btn-primary">💾 プランを保存</button>
+                                    <button id="cancel-edit-btn" class="btn-secondary">キャンセル</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="page-header">
+                    <h2>⚙️ 設定</h2>
+                    <p>プレイヤープロファイルとアプリケーション設定</p>
+                </div>
+
+                <!-- Player Profile Settings -->
+                <div class="card">
+                    <h3>プレイヤープロファイル</h3>
+                    <div class="profile-settings">
+                        <!-- 現在のランク表示（戦績から自動取得） -->
+                        <div class="current-rank-display" id="current-rank-display">
+                            <div class="rank-info-section">
+                                <div class="rank-info">
+                                    <span class="rank-icon" id="current-rank-icon">🎮</span>
+                                    <div class="rank-details">
+                                        <span class="rank-label">現在のランク</span>
+                                        <span class="rank-value" id="current-rank-value">取得中...</span>
+                                        <span class="rank-rr" id="current-rank-rr"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Application Settings -->
+                <div class="card">
+                    <h3>アプリケーション設定</h3>
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <label for="notifications">通知を有効にする</label>
+                            <input type="checkbox" id="notifications" checked>
+                        </div>
+                        <div class="setting-item">
+                            <label for="auto-analysis">自動分析を有効にする</label>
+                            <input type="checkbox" id="auto-analysis">
+                        </div>
+                        <div class="setting-item">
+                            <label for="data-retention">データ保持期間（日）</label>
+                            <input type="number" id="data-retention" value="30" min="1" max="365">
+                        </div>
+                        <div class="setting-item">
+                            <label>アプリの初期化</label>
+                            <button id="reset-app-btn" class="btn-secondary">初期化する</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Coaching Plans Page -->
+            <div id="coaching-plans" class="page">
+                <div class="page-header">
+                    <h2>📋 コーチングプラン</h2>
+                    <p>現在のプランと進捗状況を確認</p>
+                </div>
+
+                <!-- All Plans -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>すべてのプラン</h3>
+                        <div class="plan-filters">
+                            <select id="plan-status-filter">
+                                <option value="all">すべて</option>
+                                <option value="active">アクティブ</option>
+                                <option value="completed">完了</option>
+                                <option value="paused">一時停止</option>
+                                <option value="draft">下書き</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="all-plans-container" class="plans-container">
+                        <!-- All plans will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>分析中...</p>
+            </div>
+        </div>
+
+        <!-- Toast Messages -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>e-Bridge</h2>
+                    <p>ログインまたは新規登録</p>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="login">ログイン</button>
+                    <button class="tab-btn" data-tab="register">新規登録</button>
+                </div>
+                
+                <div id="login-tab" class="tab-content active">
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="login-username">ユーザー名</label>
+                            <input type="text" id="login-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">パスワード</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn-primary">ログイン</button>
+                    </form>
+                </div>
+                
+                <div id="register-tab" class="tab-content">
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="register-username">ユーザー名</label>
+                            <input type="text" id="register-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">メールアドレス</label>
+                            <input type="email" id="register-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">パスワード</label>
+                            <input type="password" id="register-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password-confirm">パスワード（確認）</label>
+                            <input type="password" id="register-password-confirm" required>
+                        </div>
+                        <button type="submit" class="btn-primary">登録</button>
+                    </form>
+                </div>
+                
+                <div class="modal-divider">
+                    <span>または</span>
+                </div>
+                
+                <div class="guest-access">
+                    <button id="guest-btn" class="btn-guest">ゲストとして使用する</button>
+                    <p class="guest-note">※ データは保存されません</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>処理中...</p>
+        </div>
+    </div>
+
+    <!-- API Initial Setup Modal -->
+    <div id="api-initial-setup-modal" class="modal api-setup-priority">
+        <div class="modal-overlay"></div>
+        <div class="modal-content api-setup-content">
+            
+            <!-- Header -->
+            <div class="setup-header">
+                <div class="logo-section">
+                    <h1>🌉 e-Bridge</h1>
+                    <p class="tagline">AI-Powered eSports Performance Bridge</p>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="setup-body">
+                <div class="setup-title">
+                    <h2>🔑 APIキー初期設定</h2>
+                    <p>e-BridgeのAI機能を使用するには、Gemini APIキーが必要です</p>
+                </div>
+                
+                <!-- API Key Input Area -->
+                <div class="api-input-section">
+                    <label for="initial-api-key">Gemini APIキー</label>
+                    <div class="input-wrapper">
+                        <input type="password" 
+                               id="initial-api-key" 
+                               placeholder="APIキーを入力"
+                               autocomplete="off">
+                        <button id="toggle-initial-key" class="eye-btn">👁️</button>
+                    </div>
+                    <div class="input-helper">
+                        <p>APIキーは一度設定すれば、すべてのAI機能で共通使用されます</p>
+                    </div>
+                </div>
+                
+                <!-- Feature Information -->
+                <div class="features-info">
+                    <h3>利用可能になる機能：</h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">💬</span>
+                            <div>
+                                <strong>AIチャット</strong>
+                                <p>パーソナライズされたコーチング</p>
+                                <small class="model-info">Gemini 1.5 Flash</small>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🎯</span>
+                            <div>
+                                <strong>目標別アドバイス</strong>
+                                <p>目標に応じた具体的な提案</p>
+                                <small class="model-info">Gemini 1.5 Flash</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="setup-actions">
+                    <button id="test-initial-api" class="btn-secondary">
+                        接続テスト
+                    </button>
+                    <button id="save-initial-api" class="btn-primary" disabled>
+                        設定を保存して開始
+                    </button>
+                </div>
+                
+                <!-- API Key Help -->
+                <div class="api-help">
+                    <p>APIキーをお持ちでない方は</p>
+                    <a href="https://makersuite.google.com/app/apikey" 
+                       target="_blank" 
+                       class="api-link">
+                        Google AI Studioで無料取得 →
+                    </a>
+                </div>
+                
+                <!-- Error Help -->
+                <div class="error-help" style="display: none; margin-top: 15px; padding: 10px; background-color: var(--error-bg, #fee); border: 1px solid var(--error-border, #fcc); border-radius: 4px; color: var(--error-text, #c33);">
+                    接続テストでエラーが発生しました
+                </div>
+                
+                <!-- Skip Option -->
+                <div class="skip-option">
+                    <button id="skip-api-setup" class="btn-text">
+                        後で設定する（一部機能制限）
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initial Setup Modal (Game & Skill Selection) -->
+    <div id="initial-setup-modal" class="modal initial-setup-priority">
+        <div class="modal-overlay"></div>
+        <div class="modal-content initial-setup-content">
+
+            <!-- Header -->
+            <div class="setup-header">
+                <div class="logo-section">
+                    <h1>🌉 e-Bridge</h1>
+                    <p class="tagline">AI-Powered eSports Performance Bridge</p>
+                </div>
+                <div class="setup-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="setup-progress-fill"></div>
+                    </div>
+                    <span class="progress-text" id="setup-progress-text">ステップ 1 / 1</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Skill Level Selection -->
+            <div class="setup-step" id="setup-step-1">
+                <div class="step-content">
+                    <div class="step-title">
+                        <h2>📊 スキルレベルを選択</h2>
+                        <p>現在のスキルレベルを正直に選択してください</p>
+                    </div>
+
+                    <div class="skill-grid" id="setup-skill-grid">
+                        <div class="skill-card" data-skill="beginner">
+                            <div class="skill-icon">🌱</div>
+                            <h3>初心者</h3>
+                            <p>基本的なゲームメカニクスを学習中</p>
+                            <ul class="skill-features">
+                                <li>基本操作の習得</li>
+                                <li>ルール理解</li>
+                                <li>基礎練習</li>
+                            </ul>
+                        </div>
+                        <div class="skill-card" data-skill="intermediate">
+                            <div class="skill-icon">📊</div>
+                            <h3>中級者</h3>
+                            <p>ゲームの基本は理解し、上達を目指している</p>
+                            <ul class="skill-features">
+                                <li>戦略理解</li>
+                                <li>応用テクニック</li>
+                                <li>チームプレイ</li>
+                            </ul>
+                        </div>
+                        <div class="skill-card" data-skill="advanced">
+                            <div class="skill-icon">🏆</div>
+                            <h3>上級者</h3>
+                            <p>高度な戦略と技術を身につけている</p>
+                            <ul class="skill-features">
+                                <li>メタ理解</li>
+                                <li>高度な戦術</li>
+                                <li>コーチング視点</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button id="setup-skill-complete" class="btn-primary" disabled>
+                            設定完了
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completion Step -->
+            <div class="setup-step hidden" id="setup-step-complete">
+                <div class="step-content completion-content">
+                    <div class="completion-icon">🎉</div>
+                    <h2>設定完了！</h2>
+                    <p>あなたのプロフィールが設定されました</p>
+
+                    <div class="profile-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">選択ゲーム:</span>
+                            <span class="summary-value" id="summary-game">VALORANT</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">スキルレベル:</span>
+                            <span class="summary-value" id="summary-skill">中級者</span>
+                        </div>
+                    </div>
+
+                    <div class="next-steps">
+                        <h3>これからできること：</h3>
+                        <div class="feature-preview">
+                            <div class="preview-item">
+                                <span class="preview-icon">🎯</span>
+                                <div>
+                                    <strong>日替わりコーチング</strong>
+                                    <p>毎日パーソナライズされたアドバイス</p>
+                                </div>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-icon">📈</span>
+                                <div>
+                                    <strong>パフォーマンス分析</strong>
+                                    <p>詳細な試合データ分析</p>
+                                </div>
+                            </div>
+                            <div class="preview-item">
+                                <span class="preview-icon">🤖</span>
+                                <div>
+                                    <strong>AIチャット</strong>
+                                    <p>リアルタイムでの質問と回答</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-actions">
+                        <button id="setup-start-app" class="btn-primary btn-large">
+                            e-Bridgeを開始する
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Detail Modal -->
+    <div id="match-detail-modal" class="modal hidden">
+        <div class="modal-overlay" onclick="app.closeMatchDetailModal()"></div>
+        <div class="modal-content match-detail-content">
+            <div class="modal-header">
+                <h2>試合詳細</h2>
+                <button class="modal-close" onclick="app.closeMatchDetailModal()">✕</button>
+            </div>
+
+            <div class="match-detail-body" id="match-detail-body">
+                <!-- 詳細はJavaScriptで動的に生成されます -->
+            </div>
+
+            <div class="match-detail-actions">
+                <button class="btn-secondary" onclick="app.closeMatchDetailModal()">閉じる</button>
+                <button class="btn-primary" id="edit-match-btn">✏️ 編集</button>
+                <button class="btn-danger" id="delete-match-btn">削除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan Detail Modal -->
+    <div id="plan-detail-modal" class="modal hidden">
+        <div class="modal-overlay" onclick="app.closePlanDetailModal()"></div>
+        <div class="modal-content plan-detail-content">
+            <div class="modal-header">
+                <h2 id="plan-detail-title">プラン詳細</h2>
+                <div class="modal-header-actions">
+                    <button class="modal-close" onclick="app.closePlanDetailModal()">✕</button>
+                </div>
+            </div>
+
+            <div class="plan-detail-body">
+                <!-- プラン概要 -->
+                <div class="plan-overview">
+                    <div class="plan-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">目標</span>
+                            <span class="meta-value" id="detail-goal-title">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">ステータス</span>
+                            <span class="meta-value" id="detail-plan-status">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">総週数</span>
+                            <span class="meta-value" id="detail-total-weeks">-</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">進捗</span>
+                            <span class="meta-value" id="detail-progress">-</span>
+                        </div>
+                    </div>
+
+                    <div class="plan-progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="detail-progress-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 現在週の詳細 -->
+                <div class="current-week-section">
+                    <h3>📅 現在週の詳細</h3>
+                    <div class="current-week-card" id="detail-current-week">
+                        <!-- 動的に生成 -->
+                    </div>
+                </div>
+
+                <!-- 週別プラン一覧 -->
+                <div class="weeks-timeline">
+                    <h3>📋 週別プラン</h3>
+                    <div class="timeline-container" id="detail-weeks-timeline">
+                        <!-- 動的に生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="plan-detail-actions">
+                <button class="btn-secondary" onclick="app.closePlanDetailModal()">閉じる</button>
+                <button class="btn-accent" id="detail-edit-plan-btn" onclick="app.editPlanFromDetail()">プランを編集</button>
+                <div class="plan-status-actions">
+                    <button class="btn-warning" id="detail-pause-plan-btn" onclick="app.pausePlanFromDetail()">⏸️ 一時停止</button>
+                    <button class="btn-success" id="detail-resume-plan-btn" onclick="app.resumePlanFromDetail()">▶️ 再開</button>
+                    <button class="btn-primary" id="detail-complete-plan-btn" onclick="app.completePlanFromDetail()">完了</button>
+                    <button class="btn-danger" id="detail-delete-plan-btn" onclick="app.deletePlanFromDetail()">削除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Rate Detail Modal -->
+    <div id="winrate-detail-modal" class="modal hidden">
+        <div class="modal-overlay" onclick="app.closeWinRateDetailModal()"></div>
+        <div class="modal-content winrate-detail-content">
+            <div class="modal-header">
+                <h2>📊 対戦キャラクター別勝率詳細</h2>
+            </div>
+
+            <div class="modal-body">
+                <!-- 統計サマリー -->
+                <div class="stats-summary">
+                    <div class="summary-stat">
+                        <span class="summary-label">総試合数</span>
+                        <span class="summary-value" id="detail-total-matches">0</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-label">対戦キャラ数</span>
+                        <span class="summary-value" id="detail-unique-opponents">0</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-label">全体勝率</span>
+                        <span class="summary-value" id="detail-overall-winrate">0%</span>
+                    </div>
+                </div>
+
+                <!-- ソート・フィルター -->
+                <div class="detail-controls">
+                    <div class="control-group">
+                        <label for="sort-by">並び替え:</label>
+                        <select id="sort-by" class="sort-select">
+                            <option value="matches-desc">対戦回数（多い順）</option>
+                            <option value="matches-asc">対戦回数（少ない順）</option>
+                            <option value="winrate-desc">勝率（高い順）</option>
+                            <option value="winrate-asc">勝率（低い順）</option>
+                            <option value="name-asc">キャラ名（A-Z）</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="min-matches">最小試合数:</label>
+                        <input type="number" id="min-matches" min="0" value="0" class="filter-input">
+                    </div>
+                </div>
+
+                <!-- キャラクター別勝率リスト -->
+                <div class="opponent-stats-list" id="opponent-stats-list">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="app.closeWinRateDetailModal()">閉じる</button>
+                <button class="btn-primary" onclick="app.exportWinRateData()">📥 データをエクスポート</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coaching History Modal -->
+    <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+    <div id="history-modal" class="history-modal" style="display: none;">
+        <div class="history-modal-header">
+            <h3>📜 コーチング履歴</h3>
+            <button id="close-modal-button" class="close-modal-btn">✕</button>
+        </div>
+        <div class="history-modal-body">
+            <div class="history-search-section">
+                <input type="text" id="search-history-input" class="search-history-input" placeholder="キーワードで検索...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div id="history-list-container" class="history-list-container">
+                <!-- 履歴がここに表示されます -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Management Modal -->
+    <div id="map-management-modal" class="modal hidden">
+        <div class="modal-overlay" onclick="app.closeMapManagementModal()"></div>
+        <div class="modal-content map-management-content">
+            <div class="modal-header">
+                <h2>🗺️ マップ管理</h2>
+                <button class="modal-close" onclick="app.closeMapManagementModal()">✕</button>
+            </div>
+
+            <div class="map-management-body">
+                <!-- 既存マップリスト -->
+                <div class="map-management-section">
+                    <h3>既存マップの表示設定</h3>
+                    <p class="subtitle">チェックを入れたマップが試合記録時に表示されます</p>
+                    <div class="map-list" id="existing-maps-list">
+                        <!-- 動的に生成されます -->
+                    </div>
+                </div>
+
+                <!-- 新規マップ追加フォーム -->
+                <div class="map-management-section">
+                    <h3>新しいマップを追加</h3>
+                    <form id="add-map-form" class="add-map-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-map-name">マップ名 <span class="required">*</span></label>
+                                <input type="text" id="new-map-name" placeholder="例: 新マップ" required maxlength="30">
+                                <span class="input-hint">最大30文字</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-map-icon">アイコン画像</label>
+                                <div class="icon-upload-wrapper">
+                                    <input type="file" id="new-map-icon" accept="image/*">
+                                    <div class="icon-preview" id="icon-preview">
+                                        <span class="preview-placeholder">🗺️</span>
+                                    </div>
+                                </div>
+                                <span class="input-hint">推奨: 正方形の画像 (最大2MB)</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">➕ マップを追加</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="map-management-actions">
+                <button class="btn-secondary" onclick="app.closeMapManagementModal()">キャンセル</button>
+                <button class="btn-primary" id="save-map-settings">💾 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating AI Chat Button -->
+    <button id="floating-chat-btn" class="floating-chat-btn" title="AIコーチに質問">
+        <img src="images/ykunicon.png" alt="AIコーチ" class="chat-btn-icon">
+    </button>
+
+    <!-- Floating Chat Popup -->
+    <div id="floating-chat-popup" class="floating-chat-popup hidden">
+        <div class="chat-popup-header">
+            <h3>🤖 AIコーチ</h3>
+            <button class="chat-popup-close" id="close-chat-popup">✕</button>
+        </div>
+        <div class="chat-popup-body">
+            <div class="chat-messages" id="floating-chat-messages">
+                <div class="chat-message assistant">
+                    <div class="message-content">
+                        こんにちは！VALORANTの上達について何でも聞いてください。戦績データを元にアドバイスします。
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-popup-footer">
+            <div class="chat-input-wrapper">
+                <input type="text" id="floating-chat-input" placeholder="質問を入力...">
+                <button id="floating-chat-send" class="chat-send-btn">送信</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="mock-data.js"></script>
+    <script src="api-service.js"></script>
+    <script src="auth-service.js"></script>
+    <script src="valorant-api-service.js"></script>
+    <script src="game-categories.js"></script>
+    <script src="theme-manager.js"></script>
+    <script src="unified-api-manager.js"></script>
+    <script src="gemini-service.js"></script>
+    <script src="coaching-service.js"></script>
+    <script src="coaching-plan-service.js"></script>
+    <script src="rpg-window-system.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
