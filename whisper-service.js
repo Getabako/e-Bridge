@@ -156,6 +156,11 @@ class WhisperService {
             throw new Error('OpenAI APIキーが設定されていません');
         }
 
+        // 音声が短すぎる場合は警告（10KB未満は約0.5秒以下）
+        if (audioBlob.size < 10000) {
+            console.warn('Audio too short, may cause hallucination');
+        }
+
         // 音声ファイルを準備
         const formData = new FormData();
 
@@ -164,7 +169,11 @@ class WhisperService {
         formData.append('file', audioBlob, `audio.${ext}`);
         formData.append('model', 'whisper-1');
         formData.append('language', 'ja');
-        formData.append('response_format', 'json');
+        formData.append('response_format', 'verbose_json');
+        // プロンプトでコンテキストを与えてハルシネーションを防ぐ
+        formData.append('prompt', 'これはVALORANTというゲームについての質問や会話です。エイム、キルデス比、ランク、エージェント、マップなどについて話しています。');
+        // temperatureを下げて確実性を上げる
+        formData.append('temperature', '0');
 
         console.log('Sending to Whisper API, file type:', audioBlob.type, 'size:', audioBlob.size);
 
@@ -185,6 +194,38 @@ class WhisperService {
 
             const result = await response.json();
             console.log('Whisper API result:', result);
+
+            // verbose_jsonの場合、no_speech_probをチェック
+            // 無音確率が高い場合はハルシネーションの可能性が高い
+            if (result.segments && result.segments.length > 0) {
+                const avgNoSpeechProb = result.segments.reduce((sum, s) => sum + (s.no_speech_prob || 0), 0) / result.segments.length;
+                console.log('Average no_speech_prob:', avgNoSpeechProb);
+
+                // 無音確率が50%以上の場合は空を返す
+                if (avgNoSpeechProb > 0.5) {
+                    console.warn('High no_speech probability, likely hallucination');
+                    return '';
+                }
+
+                // 既知のハルシネーションフレーズをフィルタリング
+                const hallucinations = [
+                    'ご視聴ありがとうございました',
+                    'ありがとうございました',
+                    'チャンネル登録',
+                    'いいねボタン',
+                    '字幕',
+                    'ご覧いただき'
+                ];
+
+                const text = result.text || '';
+                for (const phrase of hallucinations) {
+                    if (text.includes(phrase) && avgNoSpeechProb > 0.3) {
+                        console.warn('Detected likely hallucination phrase:', text);
+                        return '';
+                    }
+                }
+            }
+
             return result.text || '';
 
         } catch (error) {
