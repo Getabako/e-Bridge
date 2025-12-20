@@ -3694,6 +3694,7 @@ class App {
 
         // 入力をクリア
         input.value = '';
+        input.classList.remove('interim'); // 音声入力の中間状態をクリア
         if (sendBtn) sendBtn.disabled = true;
 
         // ローディング表示
@@ -3793,6 +3794,11 @@ class App {
                         <div class="message-content">${this.formatChatResponse(responseText)}</div>
                     </div>
                 `;
+            }
+
+            // 音声読み上げ（voice-chat-serviceが読み込まれている場合）
+            if (typeof speakAIResponse === 'function') {
+                speakAIResponse(responseText);
             }
 
         } catch (error) {

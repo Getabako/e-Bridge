@@ -1118,6 +1118,137 @@ input[type="checkbox"]:checked::after {
 /* ============================================
    Responsive Adjustments
    ============================================ */
+/* ============================================
+   Voice Chat Buttons
+   ============================================ */
+.voice-buttons {
+  display: flex;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.voice-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 245, 255, 0.3);
+  background: rgba(10, 10, 26, 0.8);
+  color: var(--neon-cyan);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-btn:hover {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 245, 255, 0.15);
+  transform: scale(1.1);
+  box-shadow: var(--glow-cyan);
+}
+
+.voice-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: all 0.3s ease;
+}
+
+/* Mic Button - Listening State */
+.voice-btn.mic-btn.listening {
+  border-color: var(--neon-pink);
+  background: rgba(255, 45, 106, 0.2);
+  color: var(--neon-pink);
+  animation: micPulse 1s ease-in-out infinite;
+  box-shadow: var(--glow-pink);
+}
+
+.voice-btn.mic-btn.listening::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--neon-pink);
+  animation: micRing 1.5s ease-out infinite;
+  opacity: 0;
+}
+
+@keyframes micPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes micRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Speaker Button - Speaking State */
+.voice-btn.speaker-btn.speaking {
+  border-color: var(--neon-green);
+  background: rgba(57, 255, 20, 0.2);
+  color: var(--neon-green);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.5);
+}
+
+.voice-btn.speaker-btn.speaking svg {
+  animation: speakerWave 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes speakerWave {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+/* Speaker Button - Disabled State */
+.voice-btn.speaker-btn.disabled {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.3);
+  background: rgba(10, 10, 26, 0.5);
+}
+
+.voice-btn.speaker-btn.disabled:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: none;
+  transform: scale(1.05);
+}
+
+/* Chat Input - Interim State */
+#floating-chat-input.interim {
+  border-color: var(--neon-pink);
+  background: rgba(255, 45, 106, 0.1);
+  animation: inputPulse 1s ease-in-out infinite;
+}
+
+@keyframes inputPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 45, 106, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 45, 106, 0.1); }
+}
+
+/* Updated Chat Input Wrapper for Voice Buttons */
+.chat-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-input-wrapper input {
+  flex: 1;
+}
+
 @media (max-width: 768px) {
   .page-header h2 {
     font-size: 1.8rem;
@@ -1140,5 +1271,17 @@ input[type="checkbox"]:checked::after {
 
   body::after {
     display: none; /* Disable scan lines on mobile for performance */
+  }
+
+  /* Voice buttons on mobile */
+  .voice-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .voice-btn svg {
+    width: 16px;
+    height: 16px;
   }
 }

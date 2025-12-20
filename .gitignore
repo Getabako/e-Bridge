@@ -2,3 +2,5 @@ node_modules/
 .npm/
 playwright-report/
 test-results/
+VOICEPEAK*
+*.exe
