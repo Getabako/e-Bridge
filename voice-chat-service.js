@@ -11,8 +11,9 @@ class VoiceChatService {
         this.synthesis = window.speechSynthesis;
         this.selectedVoice = null;
         this.voiceRate = 1.0;
-        this.voicePitch = 1.1; // 少し高めで女性らしく
+        this.voicePitch = 1.1;
         this.voiceVolume = 1.0;
+        this.restartTimeout = null;
 
         this.initSpeechRecognition();
         this.initVoices();
@@ -31,37 +32,20 @@ class VoiceChatService {
 
         this.recognition = new SpeechRecognition();
         this.recognition.lang = 'ja-JP';
-        this.recognition.continuous = true;  // 継続的に聞き取る
+        this.recognition.continuous = false;  // シンプルに1回ずつ
         this.recognition.interimResults = true;
         this.recognition.maxAlternatives = 1;
 
-        // 音声検出の感度を上げる設定
-        if (this.recognition.speechRecognitionOptions) {
-            this.recognition.speechRecognitionOptions = {
-                enableAutomaticPunctuation: true
-            };
-        }
-
         this.recognition.onstart = () => {
-            this.isListening = true;
-            this.updateMicButtonState(true);
             console.log('Voice recognition started');
+            this.updateMicButtonState(true);
         };
 
         this.recognition.onend = () => {
             console.log('Voice recognition ended');
-            // continuous modeでも終了することがあるので、リスニング中なら再開
+            // リスニング状態なら再開（no-speechでendが呼ばれた場合）
             if (this.isListening) {
-                setTimeout(() => {
-                    if (this.isListening) {
-                        try {
-                            this.recognition.start();
-                            console.log('Voice recognition restarted');
-                        } catch (e) {
-                            console.log('Recognition restart skipped:', e.message);
-                        }
-                    }
-                }, 100);
+                this.scheduleRestart();
             } else {
                 this.updateMicButtonState(false);
             }
@@ -74,10 +58,9 @@ class VoiceChatService {
             if (lastResult.isFinal) {
                 const transcript = lastResult[0].transcript.trim();
                 if (transcript) {
-                    // 音声入力完了 - リスニングを停止してから送信
-                    this.isListening = false;
-                    this.recognition.stop();
-                    this.updateMicButtonState(false);
+                    console.log('Final result:', transcript);
+                    // 停止してから送信
+                    this.stopListening();
                     this.onSpeechResult(transcript);
                 }
             } else {
@@ -88,41 +71,55 @@ class VoiceChatService {
         };
 
         this.recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
+            console.log('Speech recognition event:', event.error);
 
-            if (event.error === 'not-allowed') {
-                this.isListening = false;
-                this.updateMicButtonState(false);
-                this.showToast('マイクへのアクセスが許可されていません。ブラウザの設定を確認してください。', 'error');
-            } else if (event.error === 'no-speech') {
-                // no-speechエラーの場合は自動で再開を試みる
-                if (this.isListening) {
-                    console.log('No speech detected, continuing to listen...');
-                    // 少し待ってから再開
-                    setTimeout(() => {
-                        if (this.isListening) {
-                            try {
-                                this.recognition.start();
-                            } catch (e) {
-                                // 既に開始されている場合は無視
-                            }
-                        }
-                    }, 100);
-                }
-            } else if (event.error === 'aborted') {
-                // ユーザーによる中止
-                this.isListening = false;
-                this.updateMicButtonState(false);
-            } else if (event.error === 'network') {
-                this.isListening = false;
-                this.updateMicButtonState(false);
-                this.showToast('ネットワークエラー。インターネット接続を確認してください。', 'error');
-            } else {
-                this.isListening = false;
-                this.updateMicButtonState(false);
-                this.showToast(`音声認識エラー: ${event.error}`, 'warning');
+            switch (event.error) {
+                case 'no-speech':
+                    // 音声が検出されなかった - リスニング中なら継続
+                    // onendで再開されるので、ここでは何もしない
+                    break;
+
+                case 'not-allowed':
+                case 'service-not-allowed':
+                    this.stopListening();
+                    this.showToast('マイクへのアクセスが許可されていません', 'error');
+                    break;
+
+                case 'network':
+                    this.stopListening();
+                    this.showToast('ネットワークエラー', 'error');
+                    break;
+
+                case 'aborted':
+                    // ユーザーによる中止 - 何もしない
+                    break;
+
+                default:
+                    // その他のエラー
+                    console.warn('Speech recognition error:', event.error);
+                    break;
             }
         };
+    }
+
+    /**
+     * 再起動をスケジュール（重複防止）
+     */
+    scheduleRestart() {
+        if (this.restartTimeout) {
+            clearTimeout(this.restartTimeout);
+        }
+
+        this.restartTimeout = setTimeout(() => {
+            if (this.isListening && this.recognition) {
+                try {
+                    this.recognition.start();
+                } catch (e) {
+                    // 既に開始されている場合は無視
+                    console.log('Restart skipped');
+                }
+            }
+        }, 300);
     }
 
     /**
@@ -152,11 +149,9 @@ class VoiceChatService {
                 this.selectedVoice = voices[0];
             }
 
-            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
             console.log('Selected voice:', this.selectedVoice?.name);
         };
 
-        // Chrome等では非同期でvoicesが読み込まれる
         if (this.synthesis.getVoices().length > 0) {
             loadVoices();
         } else {
@@ -173,6 +168,7 @@ class VoiceChatService {
             return;
         }
 
+        // トグル動作
         if (this.isListening) {
             this.stopListening();
             return;
@@ -183,10 +179,15 @@ class VoiceChatService {
             this.stopSpeaking();
         }
 
+        this.isListening = true;
+        this.updateMicButtonState(true);
+
         try {
             this.recognition.start();
         } catch (error) {
-            console.error('Failed to start speech recognition:', error);
+            console.error('Failed to start:', error);
+            this.isListening = false;
+            this.updateMicButtonState(false);
         }
     }
 
@@ -194,9 +195,22 @@ class VoiceChatService {
      * 音声入力を停止
      */
     stopListening() {
-        if (this.recognition && this.isListening) {
-            this.recognition.stop();
+        this.isListening = false;
+
+        if (this.restartTimeout) {
+            clearTimeout(this.restartTimeout);
+            this.restartTimeout = null;
         }
+
+        if (this.recognition) {
+            try {
+                this.recognition.stop();
+            } catch (e) {
+                // 既に停止している場合は無視
+            }
+        }
+
+        this.updateMicButtonState(false);
     }
 
     /**
@@ -209,7 +223,6 @@ class VoiceChatService {
         }
 
         return new Promise((resolve, reject) => {
-            // 既存の音声を停止
             this.synthesis.cancel();
 
             const utterance = new SpeechSynthesisUtterance(text);
@@ -264,26 +277,10 @@ class VoiceChatService {
         if (micBtn) {
             if (isActive) {
                 micBtn.classList.add('listening');
-                micBtn.title = '音声入力中... (クリックで停止)';
-                micBtn.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                    </svg>
-                `;
+                micBtn.title = 'クリックで停止';
             } else {
                 micBtn.classList.remove('listening');
                 micBtn.title = '音声で入力';
-                micBtn.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                        <line x1="12" y1="19" x2="12" y2="23"/>
-                        <line x1="8" y1="23" x2="16" y2="23"/>
-                    </svg>
-                `;
             }
         }
     }
@@ -303,15 +300,15 @@ class VoiceChatService {
     }
 
     /**
-     * 音声認識結果のコールバック（オーバーライド用）
+     * 音声認識結果のコールバック
      */
     onSpeechResult(transcript) {
         console.log('Speech result:', transcript);
-        // チャット入力欄に設定
         const input = document.getElementById('floating-chat-input');
         if (input) {
             input.value = transcript;
-            // 送信イベントをトリガー
+            input.classList.remove('interim');
+            // 送信
             const sendBtn = document.getElementById('floating-chat-send');
             if (sendBtn) {
                 sendBtn.click();
@@ -340,16 +337,6 @@ class VoiceChatService {
             console.log(`[${type}] ${message}`);
         }
     }
-
-    /**
-     * 音声機能が利用可能か確認
-     */
-    isVoiceSupported() {
-        return {
-            recognition: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
-            synthesis: !!window.speechSynthesis
-        };
-    }
 }
 
 // グローバルインスタンス
@@ -359,15 +346,12 @@ const voiceChatService = new VoiceChatService();
  * チャットUIに音声ボタンを追加
  */
 function initVoiceChatUI() {
-    // チャットポップアップのフッターを取得
     const chatFooter = document.querySelector('.chat-popup-footer .chat-input-wrapper');
     if (!chatFooter) {
-        console.warn('Chat footer not found, retrying...');
         setTimeout(initVoiceChatUI, 500);
         return;
     }
 
-    // 既に追加されている場合はスキップ
     if (document.getElementById('voice-input-btn')) {
         return;
     }
@@ -377,6 +361,7 @@ function initVoiceChatUI() {
     micBtn.id = 'voice-input-btn';
     micBtn.className = 'voice-btn mic-btn';
     micBtn.title = '音声で入力';
+    micBtn.type = 'button';
     micBtn.innerHTML = `
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -392,6 +377,7 @@ function initVoiceChatUI() {
     speakerBtn.id = 'voice-output-btn';
     speakerBtn.className = 'voice-btn speaker-btn';
     speakerBtn.title = '音声読み上げON';
+    speakerBtn.type = 'button';
     speakerBtn.dataset.enabled = 'true';
     speakerBtn.innerHTML = `
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -417,7 +403,6 @@ function initVoiceChatUI() {
     voiceBtnsContainer.appendChild(micBtn);
     voiceBtnsContainer.appendChild(speakerBtn);
 
-    // 入力欄の前に挿入
     const inputField = chatFooter.querySelector('input');
     if (inputField) {
         chatFooter.insertBefore(voiceBtnsContainer, inputField);
@@ -432,14 +417,14 @@ function initVoiceChatUI() {
 function speakAIResponse(text) {
     const speakerBtn = document.getElementById('voice-output-btn');
     if (speakerBtn && speakerBtn.dataset.enabled === 'true') {
-        // 絵文字や特殊文字を除去してから読み上げ
+        // 絵文字や特殊文字を除去
         const cleanText = text
-            .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // 顔文字
-            .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // その他の絵文字
-            .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // 乗り物等
-            .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '') // 国旗
-            .replace(/[\u{2600}-\u{26FF}]/gu, '')   // その他の記号
-            .replace(/[\u{2700}-\u{27BF}]/gu, '')   // 装飾記号
+            .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+            .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+            .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+            .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+            .replace(/[\u{2600}-\u{26FF}]/gu, '')
+            .replace(/[\u{2700}-\u{27BF}]/gu, '')
             .trim();
 
         if (cleanText) {
@@ -448,13 +433,11 @@ function speakAIResponse(text) {
     }
 }
 
-// DOMContentLoaded時に初期化
+// 初期化
 document.addEventListener('DOMContentLoaded', () => {
-    // 少し遅延させて他のスクリプトの読み込みを待つ
     setTimeout(initVoiceChatUI, 100);
 });
 
-// チャットボタンクリック時にも初期化を試みる
 document.addEventListener('click', (e) => {
     if (e.target.closest('#floating-chat-btn')) {
         setTimeout(initVoiceChatUI, 100);
