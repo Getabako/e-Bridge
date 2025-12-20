@@ -31,9 +31,16 @@ class VoiceChatService {
 
         this.recognition = new SpeechRecognition();
         this.recognition.lang = 'ja-JP';
-        this.recognition.continuous = false;
+        this.recognition.continuous = true;  // 継続的に聞き取る
         this.recognition.interimResults = true;
         this.recognition.maxAlternatives = 1;
+
+        // 音声検出の感度を上げる設定
+        if (this.recognition.speechRecognitionOptions) {
+            this.recognition.speechRecognitionOptions = {
+                enableAutomaticPunctuation: true
+            };
+        }
 
         this.recognition.onstart = () => {
             this.isListening = true;
@@ -42,9 +49,22 @@ class VoiceChatService {
         };
 
         this.recognition.onend = () => {
-            this.isListening = false;
-            this.updateMicButtonState(false);
             console.log('Voice recognition ended');
+            // continuous modeでも終了することがあるので、リスニング中なら再開
+            if (this.isListening) {
+                setTimeout(() => {
+                    if (this.isListening) {
+                        try {
+                            this.recognition.start();
+                            console.log('Voice recognition restarted');
+                        } catch (e) {
+                            console.log('Recognition restart skipped:', e.message);
+                        }
+                    }
+                }, 100);
+            } else {
+                this.updateMicButtonState(false);
+            }
         };
 
         this.recognition.onresult = (event) => {
@@ -52,8 +72,14 @@ class VoiceChatService {
             const lastResult = results[results.length - 1];
 
             if (lastResult.isFinal) {
-                const transcript = lastResult[0].transcript;
-                this.onSpeechResult(transcript);
+                const transcript = lastResult[0].transcript.trim();
+                if (transcript) {
+                    // 音声入力完了 - リスニングを停止してから送信
+                    this.isListening = false;
+                    this.recognition.stop();
+                    this.updateMicButtonState(false);
+                    this.onSpeechResult(transcript);
+                }
             } else {
                 // 中間結果を表示
                 const interimTranscript = lastResult[0].transcript;
@@ -63,13 +89,38 @@ class VoiceChatService {
 
         this.recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            this.isListening = false;
-            this.updateMicButtonState(false);
 
             if (event.error === 'not-allowed') {
-                this.showToast('マイクへのアクセスが許可されていません', 'error');
+                this.isListening = false;
+                this.updateMicButtonState(false);
+                this.showToast('マイクへのアクセスが許可されていません。ブラウザの設定を確認してください。', 'error');
             } else if (event.error === 'no-speech') {
-                this.showToast('音声が検出されませんでした', 'warning');
+                // no-speechエラーの場合は自動で再開を試みる
+                if (this.isListening) {
+                    console.log('No speech detected, continuing to listen...');
+                    // 少し待ってから再開
+                    setTimeout(() => {
+                        if (this.isListening) {
+                            try {
+                                this.recognition.start();
+                            } catch (e) {
+                                // 既に開始されている場合は無視
+                            }
+                        }
+                    }, 100);
+                }
+            } else if (event.error === 'aborted') {
+                // ユーザーによる中止
+                this.isListening = false;
+                this.updateMicButtonState(false);
+            } else if (event.error === 'network') {
+                this.isListening = false;
+                this.updateMicButtonState(false);
+                this.showToast('ネットワークエラー。インターネット接続を確認してください。', 'error');
+            } else {
+                this.isListening = false;
+                this.updateMicButtonState(false);
+                this.showToast(`音声認識エラー: ${event.error}`, 'warning');
             }
         };
     }
@@ -214,9 +265,25 @@ class VoiceChatService {
             if (isActive) {
                 micBtn.classList.add('listening');
                 micBtn.title = '音声入力中... (クリックで停止)';
+                micBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                `;
             } else {
                 micBtn.classList.remove('listening');
                 micBtn.title = '音声で入力';
+                micBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                `;
             }
         }
     }

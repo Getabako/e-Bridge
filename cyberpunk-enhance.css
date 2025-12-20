@@ -745,7 +745,11 @@ body::after {
    Floating Chat Button - Pulse Effect
    ============================================ */
 .floating-chat-btn {
-  position: relative;
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  z-index: 9999 !important;
   animation: floatPulse 3s ease-in-out infinite;
 }
 
