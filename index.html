@@ -442,6 +442,28 @@
                     </div>
                 </div>
 
+                <!-- OpenAI API Settings -->
+                <div class="card">
+                    <h3>OpenAI API設定（音声入力用）</h3>
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <label for="openai-api-key">OpenAI APIキー</label>
+                            <div class="api-key-input-wrapper">
+                                <input type="password" id="openai-api-key" placeholder="sk-..." autocomplete="off">
+                                <button type="button" id="toggle-openai-key" class="btn-icon">👁️</button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>APIキーの保存</label>
+                            <button id="save-openai-key-btn" class="btn-primary">保存</button>
+                        </div>
+                        <div class="setting-item">
+                            <p class="setting-note">Whisper APIを使用して高精度な音声認識を行います。<br>
+                            <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI APIキーを取得</a></p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Application Settings -->
                 <div class="card">
                     <h3>アプリケーション設定</h3>
@@ -1055,6 +1077,7 @@
     <script src="coaching-plan-service.js"></script>
     <script src="rpg-window-system.js"></script>
     <script src="voice-chat-service.js"></script>
+    <script src="whisper-service.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

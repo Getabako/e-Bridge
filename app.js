@@ -9424,3 +9424,54 @@ const app = new App();
 
 // Export for global access
 window.app = app;
+
+// OpenAI APIキー設定のイベントハンドラ
+document.addEventListener('DOMContentLoaded', () => {
+    // APIキー入力欄の初期化
+    const apiKeyInput = document.getElementById('openai-api-key');
+    const saveBtn = document.getElementById('save-openai-key-btn');
+    const toggleBtn = document.getElementById('toggle-openai-key');
+
+    if (apiKeyInput) {
+        // 保存されているキーを読み込み
+        const savedKey = localStorage.getItem('openai_api_key');
+        if (savedKey) {
+            apiKeyInput.value = savedKey;
+        }
+    }
+
+    // 保存ボタン
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const key = apiKeyInput?.value?.trim();
+            if (key) {
+                localStorage.setItem('openai_api_key', key);
+                if (typeof whisperService !== 'undefined') {
+                    whisperService.setApiKey(key);
+                }
+                if (app.showToast) {
+                    app.showToast('APIキーを保存しました', 'success');
+                }
+            } else {
+                if (app.showToast) {
+                    app.showToast('APIキーを入力してください', 'error');
+                }
+            }
+        });
+    }
+
+    // 表示切替ボタン
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (apiKeyInput) {
+                if (apiKeyInput.type === 'password') {
+                    apiKeyInput.type = 'text';
+                    toggleBtn.textContent = '🙈';
+                } else {
+                    apiKeyInput.type = 'password';
+                    toggleBtn.textContent = '👁️';
+                }
+            }
+        });
+    }
+});

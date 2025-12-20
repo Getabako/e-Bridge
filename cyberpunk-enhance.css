@@ -1317,3 +1317,76 @@ input[type="checkbox"]:checked::after {
     height: 16px;
   }
 }
+
+/* ============================================
+   OpenAI API Key Input Styles
+   ============================================ */
+.api-key-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.api-key-input-wrapper input {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(10, 10, 30, 0.8);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 8px;
+  color: var(--neon-cyan);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.api-key-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.3), inset 0 0 10px rgba(0, 245, 255, 0.1);
+}
+
+.api-key-input-wrapper input::placeholder {
+  color: rgba(0, 245, 255, 0.4);
+}
+
+.api-key-input-wrapper .btn-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 30, 0.8);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 8px;
+  color: var(--neon-cyan);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.api-key-input-wrapper .btn-icon:hover {
+  background: rgba(0, 245, 255, 0.15);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+}
+
+.setting-note {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+}
+
+.setting-note a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.setting-note a:hover {
+  color: var(--neon-pink);
+  text-shadow: 0 0 10px rgba(255, 45, 106, 0.5);
+}
