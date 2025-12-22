@@ -238,33 +238,36 @@ ${searchQueries.map(q => `- ${q}`).join('\n')}`;
             console.log('🔍 グラウンディング有効化:', searchQueries);
         }
 
-        // API呼び出し
-        const apiKey = this.geminiService.apiKey;
+        // サーバーレス関数経由でAPI呼び出し
         const model = this.geminiService.chatModel;
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        
-        const response = await fetch(url, {
+
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                messages: requestBody.contents,
+                model: model,
+                generationConfig: requestBody.generationConfig
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`API request failed: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`API request failed: ${response.status} - ${errorData.error || 'Unknown error'}`);
         }
 
         const data = await response.json();
-        
+
         if (!data.candidates || data.candidates.length === 0) {
             throw new Error('No response from API');
         }
 
         const candidate = data.candidates[0];
         const text = candidate.content?.parts?.[0]?.text || '';
-        
+
         // グラウンディング情報を抽出
         let groundingSources = null;
-        if (candidate.groundingMetadata) {
+        if (candidate.groundingMetadata && this.geminiService.processGroundingMetadata) {
             groundingSources = this.geminiService.processGroundingMetadata(candidate.groundingMetadata);
         }
 
