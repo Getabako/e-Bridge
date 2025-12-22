@@ -3218,15 +3218,19 @@ class App {
                         <div class="gallery-stats">
                             <div class="gallery-stat">
                                 <span class="gallery-stat-label">ACS</span>
-                                <span class="gallery-stat-value">${match.acs || 0}</span>
+                                <span class="gallery-stat-value ${this.getStatClass(match.acs, 200, 150)}">${match.acs || 0}</span>
                             </div>
                             <div class="gallery-stat">
                                 <span class="gallery-stat-label">ADR</span>
-                                <span class="gallery-stat-value">${match.adr || 0}</span>
+                                <span class="gallery-stat-value ${this.getStatClass(match.adr, 150, 100)}">${match.adr || 0}</span>
                             </div>
                             <div class="gallery-stat">
                                 <span class="gallery-stat-label">HS%</span>
-                                <span class="gallery-stat-value">${match.hsPercent || 0}%</span>
+                                <span class="gallery-stat-value ${this.getStatClass(match.hsPercent, 25, 15)}">${match.hsPercent || 0}%</span>
+                            </div>
+                            <div class="gallery-stat">
+                                <span class="gallery-stat-label">K/D</span>
+                                <span class="gallery-stat-value ${this.getStatClass(parseFloat(kd), 1.2, 0.8)}">${kd}</span>
                             </div>
                         </div>
                     </div>
@@ -3237,6 +3241,18 @@ class App {
                 </div>
             `;
         }).join('');
+    }
+
+    // スタッツの値に応じたクラスを返す
+    getStatClass(value, goodThreshold, averageThreshold) {
+        const numValue = parseFloat(value) || 0;
+        if (numValue >= goodThreshold) {
+            return 'good';
+        } else if (numValue >= averageThreshold) {
+            return 'average';
+        } else {
+            return 'bad';
+        }
     }
 
     // ギャラリーのイベントリスナーを設定
@@ -5730,7 +5746,7 @@ JSONのみを出力してください。`;
         const originalTexts = {
             helpful: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 役に立った',
             too_easy: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> 簡単すぎた',
-            too_hard: '😰 難しすぎた'
+            too_hard: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> 難しすぎた'
         };
         const selectedTexts = {
             helpful: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 役に立った',
@@ -5739,9 +5755,9 @@ JSONのみを出力してください。`;
         };
 
         if (isSelected) {
-            button.textContent = selectedTexts[feedbackType] || button.textContent;
+            button.innerHTML = selectedTexts[feedbackType] || button.innerHTML;
         } else {
-            button.textContent = originalTexts[feedbackType] || button.textContent;
+            button.innerHTML = originalTexts[feedbackType] || button.innerHTML;
         }
     }
 

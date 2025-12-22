@@ -10501,7 +10501,7 @@ input[type="date"]:focus {
   position: fixed;
   bottom: 100px;
   right: 24px;
-  width: 380px;
+  width: 450px;
   max-width: calc(100vw - 48px);
   height: 500px;
   max-height: calc(100vh - 140px);
@@ -10595,20 +10595,22 @@ input[type="date"]:focus {
 }
 
 .chat-popup-footer {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-md);
   border-top: 1px solid var(--glass-border);
   background: var(--bg-elevated);
   border-radius: 0 0 var(--border-radius-xl) var(--border-radius-xl);
 }
 
-.chat-input-wrapper {
+.chat-popup-footer .chat-input-wrapper {
   display: flex;
   gap: var(--spacing-sm);
+  align-items: center;
 }
 
-.chat-input-wrapper input {
+.chat-popup-footer .chat-input-wrapper input {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
+  min-width: 0;
+  padding: 10px 16px;
   border: 1px solid var(--glass-border);
   border-radius: var(--border-radius-full);
   background: var(--bg-card);
@@ -10617,14 +10619,15 @@ input[type="date"]:focus {
   transition: var(--transition-base);
 }
 
-.chat-input-wrapper input:focus {
+.chat-popup-footer .chat-input-wrapper input:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 }
 
-.chat-send-btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
+.chat-popup-footer .chat-send-btn {
+  flex-shrink: 0;
+  padding: 10px 20px;
   background: var(--gradient-accent);
   color: white;
   border: none;
@@ -10633,9 +10636,10 @@ input[type="date"]:focus {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-base);
+  white-space: nowrap;
 }
 
-.chat-send-btn:hover {
+.chat-popup-footer .chat-send-btn:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-neon-accent);
 }
