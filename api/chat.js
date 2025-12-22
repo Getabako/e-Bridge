@@ -36,8 +36,8 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'messages is required and must be an array' });
         }
 
-        // Gemini API URLを構築
-        const baseUrl = 'https://generativelanguage.googleapis.com/v1';
+        // Gemini API URLを構築（v1betaで新しいモデルをサポート）
+        const baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
         const url = `${baseUrl}/models/${model}:generateContent?key=${apiKey}`;
 
         // リクエストボディを構築
