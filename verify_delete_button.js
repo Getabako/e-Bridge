@@ -51,21 +51,16 @@ const { chromium } = require('playwright');
   await page.reload();
   await page.waitForTimeout(2000); // 読み込み待機
 
-  // API初期設定モーダルが表示されているか確認し、強制的に非表示にする
+  // ログインモーダルを非表示にする
   await page.evaluate(() => {
-      const apiModal = document.getElementById('api-initial-setup-modal');
-      if (apiModal) {
-          apiModal.classList.add('hidden');
-          apiModal.style.display = 'none';
-          // オーバーレイも消す
-          const overlays = document.querySelectorAll('.modal-overlay');
-          overlays.forEach(o => o.style.display = 'none');
-      }
       const loginModal = document.getElementById('login-modal');
       if (loginModal) {
           loginModal.classList.add('hidden');
           loginModal.style.display = 'none';
       }
+      // オーバーレイも消す
+      const overlays = document.querySelectorAll('.modal-overlay');
+      overlays.forEach(o => o.style.display = 'none');
   });
   await page.waitForTimeout(500);
 

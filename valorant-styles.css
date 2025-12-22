@@ -1013,6 +1013,7 @@
 .chat-input-wrapper {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
 .chat-input-wrapper input {
@@ -1031,7 +1032,7 @@
 }
 
 .chat-send-btn {
-    padding: 10px 16px;
+    padding: 10px 20px;
     background: var(--color-accent);
     color: white;
     border: none;
@@ -1040,6 +1041,10 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    min-width: 60px;
+    flex-shrink: 0;
 }
 
 .chat-send-btn:hover {

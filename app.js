@@ -91,39 +91,15 @@ class App {
             return; // 初期設定が完了するまで他の処理を中断
         }
         
-        // 2. 初回設定が完了していれば、次にAPI設定をチェック
+        // 2. サーバーのAPI設定をチェック（Vercel環境変数）
         const apiCheckResult = await this.performBackgroundAPICheck();
 
-        if (apiCheckResult.success) {
-            console.log('バックグラウンドAPI接続成功');
-            this.closeInitialSetupModal(); // 不要なモーダルを閉じる
+        console.log('API設定チェック結果:', apiCheckResult);
+        this.closeInitialSetupModal(); // 不要なモーダルを閉じる
 
-            // メイン画面へ遷移
-            console.log('メイン画面へ遷移');
-            await this.initializeMainApp();
-
-            // 過負荷状態の場合は追加メッセージを表示
-            if (apiCheckResult.overloaded) {
-                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが過負荷状態です。時間をおいて再度お試しください。', 'warning');
-            }
-        } else {
-            console.log('API未設定または接続失敗');
-
-            // 503エラーの場合は特別なメッセージ
-            if (apiCheckResult.error && (
-                apiCheckResult.error.message.includes('503') ||
-                apiCheckResult.error.message.includes('過負荷') ||
-                apiCheckResult.error.message.includes('overloaded')
-            )) {
-                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが一時的に過負荷中です。APIキーは保存されているので、後ほど自動的に利用可能になります。', 'warning');
-                // 過負荷の場合でもアプリは起動する
-                await this.initializeMainApp();
-            } else {
-                // API未設定または接続失敗時はAPI設定画面を表示
-                this.showInitialAPISetupModal();
-                this.setupInitialAPIModalListeners();
-            }
-        }
+        // メイン画面へ遷移（APIキー入力画面はスキップ）
+        console.log('メイン画面へ遷移');
+        await this.initializeMainApp();
         
         console.log('App initialized successfully');
     }
@@ -286,7 +262,6 @@ class App {
     hideAllModals() {
         const modals = [
             'login-modal',
-            'api-initial-setup-modal',
             'api-setup-modal',
             'initial-setup-modal'
         ];
@@ -318,48 +293,43 @@ class App {
         console.log('統一APIマネージャー初期化完了');
     }
 
-    // バックグラウンドでAPI設定をチェック
+    // バックグラウンドでAPI設定をチェック（Vercel Serverless対応版）
     async performBackgroundAPICheck() {
         try {
-            if (!window.unifiedApiManager) {
-                return { success: false, reason: 'manager_unavailable' };
+            // サーバーの設定を確認
+            console.log('サーバーのAPI設定を確認中...');
+            const response = await fetch('/api/config');
+            const configData = await response.json();
+
+            console.log('サーバー設定:', configData);
+
+            if (configData.configured) {
+                // サーバーにAPIキーが設定されている
+                console.log('サーバーにAPIキーが設定されています');
+                return { success: true, result: configData };
+            } else {
+                // サーバーにAPIキーが未設定
+                console.log('サーバーにAPIキーが未設定です');
+                const missingKeys = [];
+                if (!configData.gemini) missingKeys.push('GEMINI_API_KEY');
+                if (!configData.openai) missingKeys.push('OPENAI_API_KEY');
+
+                // エラーメッセージを表示するが、アプリは起動する
+                this.showToast(`Vercel環境変数に ${missingKeys.join(', ')} を設定してください`, 'warning');
+                return { success: true, warning: 'api_not_configured' };
             }
-            
-            // 保存済みAPIキーがあるかチェック
-            const hasStoredKey = window.unifiedApiManager.isConfigured();
-            
-            if (!hasStoredKey) {
-                console.log('APIキーが保存されていません');
-                return { success: false, reason: 'no_api_key' };
-            }
-            
-            console.log('保存済みAPIキーを発見、バックグラウンドで接続テスト中...');
-            
-            // バックグラウンドで接続テストを実行
-            const result = await window.unifiedApiManager.validateAPIKey();
-            
-            console.log('バックグラウンド接続テスト成功:', result);
-            this.syncAPIKeyInputs();
-            
-            return { success: true, result: result };
-            
+
         } catch (error) {
-            console.warn('バックグラウンド接続テストに失敗:', error);
-            
-            // 503エラー（サーバー過負荷）の場合は、初期設定モーダルを表示せずに
-            // APIキーが設定済みとしてアプリを起動する
-            if (error.message && (error.message.includes('overloaded') || error.message.includes('503'))) {
-                console.log('Gemini APIサーバーが過負荷中ですが、APIキーは設定済みのためアプリを起動します');
-                this.showToast('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Gemini APIが一時的に過負荷中です。AI機能は後ほど利用可能になります。', 'warning');
-                this.syncAPIKeyInputs();
-                return { success: true, overloaded: true };
+            console.warn('サーバー設定の確認に失敗:', error);
+
+            // ローカル開発時（file://プロトコル）の場合は成功として扱う
+            if (window.location.protocol === 'file:') {
+                console.log('ローカル開発モード: API設定チェックをスキップ');
+                return { success: true, local: true };
             }
-            
-            return { 
-                success: false, 
-                reason: 'connection_failed',
-                error: error 
-            };
+
+            // ネットワークエラーの場合でもアプリは起動
+            return { success: true, warning: 'network_error' };
         }
     }
 
@@ -426,13 +396,8 @@ class App {
         console.log('checkAndInitializeAPIは新しいフローに置き換えられました');
     }
     
-    // 初期化の続行（APIキー設定後）
+    // 初期化の続行
     continueInitialization() {
-        // APIキー初期設定が必要な場合はスキップ
-        if (window.unifiedApiManager?.needsInitialSetup()) {
-            return;
-        }
-        
         // イベントリスナーの設定
         this.setupEventListeners();
 
@@ -454,333 +419,6 @@ class App {
 
         // 気づきタグ機能のイベントリスナー設定
         this.setupInsightTagsListeners();
-    }
-    
-    // 初期APIセットアップモーダルを表示
-    showInitialAPISetupModal() {
-        const modal = document.getElementById('api-initial-setup-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex'; // 確実に表示
-            
-            console.log('初期API設定モーダルを表示');
-            
-            // 入力フィールドの初期状態をチェック
-            setTimeout(() => {
-                const apiKeyInput = document.getElementById('initial-api-key');
-                if (apiKeyInput) {
-                    this.validateInitialAPIKeyInput(apiKeyInput.value.trim());
-                }
-            }, 400);
-        }
-    }
-    
-    // 初期APIセットアップモーダルのイベントリスナー設定
-    setupInitialAPIModalListeners() {
-        // 重複登録を防ぐ
-        if (window.apiModalListenersSet) {
-            console.log('APIモーダルリスナーは既に設定済み');
-            return;
-        }
-        
-        console.log('APIモーダルリスナーを設定中...');
-        
-        // イベント委譲を使用してdocumentレベルでイベントをキャッチ
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'test-initial-api') {
-                e.preventDefault();
-                this.testInitialAPIConnection();
-            } else if (e.target.id === 'save-initial-api') {
-                e.preventDefault();
-                this.saveInitialAPIKeyFromModal();
-            } else if (e.target.id === 'skip-api-setup') {
-                e.preventDefault();
-                this.skipInitialAPISetup();
-            } else if (e.target.id === 'toggle-initial-key') {
-                e.preventDefault();
-                this.toggleInitialAPIKeyVisibility();
-            }
-        });
-        
-        // 入力フィールドのイベントも設定
-        const apiKeyInput = document.getElementById('initial-api-key');
-        if (apiKeyInput && !apiKeyInput.hasAttribute('data-listeners-added')) {
-            apiKeyInput.addEventListener('input', (e) => {
-                this.validateInitialAPIKeyInput(e.target.value.trim());
-            });
-            apiKeyInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    const saveBtn = document.getElementById('save-initial-api');
-                    if (saveBtn && !saveBtn.disabled) {
-                        this.saveInitialAPIKeyFromModal();
-                    }
-                }
-            });
-            apiKeyInput.setAttribute('data-listeners-added', 'true');
-        }
-        
-        // 重複設定防止フラグを設定
-        window.apiModalListenersSet = true;
-        console.log('APIモーダルリスナー設定完了');
-    }
-    
-    // APIキー表示/非表示切り替え
-    toggleInitialAPIKeyVisibility() {
-        const apiKeyInput = document.getElementById('initial-api-key');
-        const toggleBtn = document.getElementById('toggle-initial-key');
-        
-        if (apiKeyInput && toggleBtn) {
-            const isPassword = apiKeyInput.type === 'password';
-            apiKeyInput.type = isPassword ? 'text' : 'password';
-            toggleBtn.textContent = isPassword ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-        }
-    }
-    
-    // 初期APIキー入力の検証
-    validateInitialAPIKeyInput(apiKey) {
-        const testBtn = document.getElementById('test-initial-api');
-        const saveBtn = document.getElementById('save-initial-api');
-        
-        if (!window.unifiedApiManager) return;
-        
-        const validation = window.unifiedApiManager.validateAPIKeyStrength(apiKey);
-        const isValid = validation.valid;
-        
-        // ボタンの有効化/無効化
-        if (testBtn) testBtn.disabled = !isValid;
-        if (saveBtn) saveBtn.disabled = !isValid;
-        
-        // 視覚的フィードバック
-        const inputWrapper = document.querySelector('#initial-api-key').parentNode;
-        if (inputWrapper) {
-            inputWrapper.classList.remove('input-valid', 'input-invalid');
-            if (apiKey.length > 0) {
-                if (isValid) {
-                    inputWrapper.classList.add('input-valid');
-                } else {
-                    inputWrapper.classList.add('input-invalid');
-                }
-            }
-        }
-    }
-    
-    
-    
-    // 初期API接続テスト
-    async testInitialAPIConnection() {
-        const apiKeyInput = document.getElementById('initial-api-key');
-        const testBtn = document.getElementById('test-initial-api');
-        
-        if (!apiKeyInput) {
-            console.error('APIキー入力フィールドが見つかりません');
-            return;
-        }
-        
-        if (!window.unifiedApiManager) {
-            console.error('統一APIマネージャが利用できません');
-            this.showToast('APIマネージャが利用できません', 'error');
-            return;
-        }
-        
-        const apiKey = apiKeyInput.value;
-        if (!apiKey) {
-            this.showToast('APIキーを入力してください', 'warning');
-            return;
-        }
-        
-        // APIキーの強度チェック
-        const validation = window.unifiedApiManager.validateAPIKeyStrength(apiKey);
-        if (!validation.valid) {
-            this.showToast(`APIキーエラー: ${validation.issues[0]}`, 'error');
-            return;
-        }
-        
-        const originalText = testBtn.textContent;
-        testBtn.disabled = true;
-        testBtn.textContent = 'テスト中...';
-        
-        try {
-            // 一時的にAPIキーを設定
-            const originalApiKey = window.unifiedApiManager.getAPIKey();
-            await window.unifiedApiManager.setAPIKey(apiKey);
-            
-            // 接続テストを実行
-            await window.unifiedApiManager.validateAPIKey();
-            
-            this.showToast('接続テストに成功しました！', 'success');
-            
-            // テスト成功時に入力欄を緑色に
-            const inputWrapper = apiKeyInput.parentNode;
-            if (inputWrapper) {
-                inputWrapper.classList.remove('input-invalid');
-                inputWrapper.classList.add('input-valid');
-            }
-            
-            // 元のAPIキーを復元（テストだけなので）
-            if (originalApiKey) {
-                await window.unifiedApiManager.setAPIKey(originalApiKey);
-            } else {
-                window.unifiedApiManager.clearAPIKey();
-            }
-            
-        } catch (error) {
-            console.error('API接続テストに失敗:', error);
-            this.showToast(`接続テストに失敗しました: ${error.message}`, 'error');
-            
-            // テスト失敗時に入力欄を赤色に
-            const inputWrapper = apiKeyInput.parentNode;
-            if (inputWrapper) {
-                inputWrapper.classList.remove('input-valid');
-                inputWrapper.classList.add('input-invalid');
-            }
-        } finally {
-            testBtn.disabled = false;
-            testBtn.textContent = originalText;
-        }
-    }
-    
-    // 初期モーダルからAPIキーを保存
-    async saveInitialAPIKeyFromModal() {
-        const apiKeyInput = document.getElementById('initial-api-key');
-        const saveBtn = document.getElementById('save-initial-api');
-        
-        if (!apiKeyInput) {
-            console.error('APIキー入力フィールドが見つかりません');
-            return;
-        }
-        
-        if (!window.unifiedApiManager) {
-            console.error('統合APIマネージャーが利用できません');
-            this.showToast('APIマネージャーが利用できません', 'error');
-            return;
-        }
-        
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            this.showToast('APIキーを入力してください', 'warning');
-            return;
-        }
-        
-        // APIキーの形式チェック
-        const validation = window.unifiedApiManager.validateAPIKeyStrength(apiKey);
-        if (!validation.valid) {
-            this.showToast(`APIキーが無効です: ${validation.issues.join(', ')}`, 'error');
-            return;
-        }
-        
-        const originalText = saveBtn.textContent;
-        saveBtn.disabled = true;
-        saveBtn.textContent = '保存中...';
-        
-        try {
-            // APIキーを統合マネージャーに保存
-            window.unifiedApiManager.setAPIKey(apiKey);
-            
-            // 既存の入力フィールドも同期
-            this.syncAPIKeyInputs();
-            
-            this.showToast('APIキーを保存しました', 'success');
-            this.closeInitialAPISetupModal();
-            
-            // APIキー設定完了後、メインアプリを初期化
-            setTimeout(async () => {
-                await this.initializeMainApp();
-            }, 500);
-            
-        } catch (error) {
-            console.error('APIキー保存に失敗:', error);
-            this.showToast(`保存に失敗しました: ${error.message}`, 'error');
-        } finally {
-            saveBtn.disabled = false;
-            saveBtn.textContent = originalText;
-        }
-    }
-    
-    // 自動接続テスト実行
-    async performAutoConnectionTest() {
-        if (!window.unifiedApiManager) {
-            throw new Error('統一APIマネージャーが利用できません');
-        }
-
-        if (!window.unifiedApiManager.isConfigured()) {
-            throw new Error('APIキーが設定されていません');
-        }
-
-        try {
-            // ローディング状態を表示（APIモーダルが非表示の場合はトースト表示）
-            const apiModal = document.getElementById('api-initial-setup-modal');
-            if (!apiModal || apiModal.classList.contains('hidden')) {
-                this.showToast('保存済みAPIキーで接続テスト中...', 'info');
-            }
-
-            // 統一APIマネージャーを使って接続テスト
-            const result = await window.unifiedApiManager.validateAPIKey();
-            
-            console.log('自動接続テスト成功:', result);
-            return result;
-            
-        } catch (error) {
-            console.error('自動接続テスト失敗:', error);
-            throw error;
-        }
-    }
-
-    // 自動接続テスト失敗時のハンドリング
-    handleAutoConnectionTestFailure(error) {
-        let errorMessage = '';
-        let shouldShowModal = true;
-        
-        // エラータイプ別のメッセージ設定
-        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-            errorMessage = '保存されたAPIキーが無効です。新しいAPIキーを設定してください。';
-        } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
-            errorMessage = 'APIキーの権限が不足しています。Gemini API の有効なキーを使用してください。';
-        } else if (error.message.includes('404') || error.message.includes('Not Found')) {
-            errorMessage = 'APIエンドポイントが見つかりません。しばらく後に再試行してください。';
-        } else if (error.message.includes('429') || error.message.includes('Rate limit')) {
-            errorMessage = 'APIの利用制限に達しました。しばらく後に再試行してください。';
-        } else if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
-            errorMessage = 'Gemini APIサーバーに問題が発生しています。しばらく後に再試行してください。';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-            errorMessage = 'ネットワーク接続に問題があります。インターネット接続を確認してください。';
-        } else {
-            errorMessage = `保存されたAPIキーでの接続に失敗しました: ${error.message}`;
-        }
-        
-        // エラートーストを表示
-        this.showToast(errorMessage, 'warning');
-        
-        // 初期設定画面を表示
-        setTimeout(() => {
-            this.showInitialAPISetupModal();
-            
-            // 初期設定画面内でエラーメッセージをハイライト
-            const errorHelp = document.querySelector('#api-initial-setup-modal .error-help');
-            if (errorHelp) {
-                errorHelp.textContent = errorMessage;
-                errorHelp.style.display = 'block';
-            }
-        }, 1000);
-    }
-
-    // 初期APIセットアップをスキップ
-    skipInitialAPISetup() {
-        this.showToast('API設定をスキップしました。一部機能が制限されます。', 'info');
-        this.closeInitialAPISetupModal();
-        
-        // スキップ後もメインアプリを初期化
-        setTimeout(async () => {
-            await this.initializeMainApp();
-        }, 500);
-    }
-    
-    // 初期APIセットアップモーダルを閉じる
-    closeInitialAPISetupModal() {
-        const modal = document.getElementById('api-initial-setup-modal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none'; // 確実に非表示にする
-        }
     }
     
     // APIセットアップモーダルを閉じる

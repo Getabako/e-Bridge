@@ -1,37 +1,56 @@
 /**
- * Whisper API Service
+ * Whisper API Service（Vercel Serverless対応版）
  * OpenAI Whisper APIを使った音声文字起こしサービス
  */
 
 class WhisperService {
     constructor() {
-        this.apiKey = localStorage.getItem('openai_api_key') || '';
+        // Vercel Serverless Function経由でAPIを呼び出す
+        this.apiEndpoint = '/api/whisper';
+        this.configEndpoint = '/api/config';
         this.isRecording = false;
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.stream = null;
+        this._isConfigured = null;
+
+        // 初期化時に設定を確認
+        this.checkConfiguration();
     }
 
     /**
-     * APIキーを設定
+     * サーバー側の設定を確認
      */
-    setApiKey(key) {
-        this.apiKey = key;
-        localStorage.setItem('openai_api_key', key);
+    async checkConfiguration() {
+        try {
+            const response = await fetch(this.configEndpoint);
+            const data = await response.json();
+            this._isConfigured = data.openai === true;
+            console.log('🔍 Whisper API設定状況:', data);
+            return this._isConfigured;
+        } catch (error) {
+            console.warn('Whisper設定確認に失敗:', error.message);
+            return false;
+        }
     }
 
     /**
-     * APIキーを取得
-     */
-    getApiKey() {
-        return this.apiKey;
-    }
-
-    /**
-     * APIキーが設定されているか確認
+     * APIキーが設定されているか確認（サーバー側で管理）
      */
     isConfigured() {
-        return this.apiKey && this.apiKey.length > 0;
+        if (this._isConfigured !== null) {
+            return this._isConfigured;
+        }
+        return true; // 初回はtrueとして扱う
+    }
+
+    // 互換性のため残すが、実質的には何もしない
+    setApiKey(key) {
+        console.log('APIキーはVercel環境変数で管理されます');
+    }
+
+    getApiKey() {
+        return '***server-managed***';
     }
 
     /**
@@ -149,13 +168,9 @@ class WhisperService {
     }
 
     /**
-     * Whisper APIで文字起こし
+     * Whisper APIで文字起こし（サーバーレス関数経由）
      */
     async transcribe(audioBlob) {
-        if (!this.isConfigured()) {
-            throw new Error('OpenAI APIキーが設定されていません');
-        }
-
         // 音声が短すぎる場合は警告（10KB未満は約0.5秒以下）
         if (audioBlob.size < 10000) {
             console.warn('Audio too short, may cause hallucination');
@@ -170,26 +185,25 @@ class WhisperService {
         formData.append('model', 'whisper-1');
         formData.append('language', 'ja');
         formData.append('response_format', 'verbose_json');
-        // プロンプトでコンテキストを与えてハルシネーションを防ぐ
         formData.append('prompt', 'これはVALORANTというゲームについての質問や会話です。エイム、キルデス比、ランク、エージェント、マップなどについて話しています。');
-        // temperatureを下げて確実性を上げる
         formData.append('temperature', '0');
 
-        console.log('Sending to Whisper API, file type:', audioBlob.type, 'size:', audioBlob.size);
+        console.log('Sending to Whisper API via server, file type:', audioBlob.type, 'size:', audioBlob.size);
 
         try {
-            const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            // サーバーレス関数経由でリクエスト
+            const response = await fetch(this.apiEndpoint, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
                 body: formData
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 console.error('Whisper API error:', errorData);
-                throw new Error(errorData.error?.message || `API error: ${response.status}`);
+                if (errorData.error?.includes('OPENAI_API_KEY')) {
+                    throw new Error('Vercel環境変数にOPENAI_API_KEYを設定してください');
+                }
+                throw new Error(errorData.error || `API error: ${response.status}`);
             }
 
             const result = await response.json();
