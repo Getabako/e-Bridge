@@ -106,8 +106,8 @@ class UnifiedAPIManager {
         return [
             {
                 name: 'AIチャット',
-                description: 'Gemini 2.5 Flash でリアルタイムチャット',
-                model: 'gemini-2.5-flash',
+                description: 'Gemini 1.5 Flash でリアルタイムチャット',
+                model: 'gemini-1.5-flash',
                 available: true
             },
             {
