@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { messages, model = 'gemini-1.5-flash', generationConfig } = req.body;
+        const { messages, model = 'gemini-3-flash-preview', generationConfig } = req.body;
 
         if (!messages || !Array.isArray(messages)) {
             return res.status(400).json({ error: 'messages is required and must be an array' });

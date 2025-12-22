@@ -4,13 +4,13 @@ class GeminiService {
         // Vercel Serverless Function経由でAPIを呼び出す
         this.apiEndpoint = '/api/chat';
         this.configEndpoint = '/api/config';
-        this.chatModel = 'gemini-1.5-flash';
+        this.chatModel = 'gemini-3-flash-preview';
         this.chatHistory = [];
         this.retryDelay = 2000;
         this.maxRetries = 5;
         this._isConfigured = null; // キャッシュ
 
-        // Gemini 1.5 Flash用の最適化されたパラメータ
+        // Gemini 3 Flash Preview用の最適化されたパラメータ
         this.chatParams = {
             temperature: 0.7,
             maxOutputTokens: 8192,
