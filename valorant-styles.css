@@ -13,36 +13,41 @@
 
 .map-option {
     padding: 1rem !important;
-    background: #2a4560 !important;
-    border: 2px solid rgba(233, 69, 96, 0.6) !important;
-    border-radius: 8px !important;
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 0px !important; /* Sharp corners */
     text-align: center !important;
     cursor: pointer !important;
-    transition: all 0.3s ease !important;
+    transition: all 0.2s ease !important;
     font-weight: 600 !important;
     font-size: 0.95rem !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 0.5rem !important;
     min-height: 50px !important;
+    position: relative;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 .map-option:hover {
     border-color: var(--color-accent) !important;
-    background: rgba(233, 69, 96, 0.15) !important;
-    transform: scale(1.05) !important;
-    box-shadow: 0 0 15px rgba(233, 69, 96, 0.4) !important;
+    background: rgba(255, 70, 85, 0.1) !important;
+    color: var(--text-primary) !important;
+    transform: translateY(-2px) !important;
 }
 
 .map-option.selected {
-    border-color: var(--color-accent) !important;
-    background: rgba(233, 69, 96, 0.25) !important;
-    box-shadow: 0 0 20px rgba(233, 69, 96, 0.5) !important;
-    transform: scale(1.05) !important;
+    border: 1px solid var(--color-accent) !important;
+    background: var(--color-accent) !important;
+    color: white !important;
+    box-shadow: var(--shadow-neon) !important;
+    transform: none !important;
 }
+
+/* Light theme support removed as per global style decision */
 
 /* Light theme map options */
 [data-theme="light"] .map-option {
@@ -82,34 +87,54 @@
 
 .agent-option {
     padding: 0.75rem 1rem !important;
-    background: linear-gradient(145deg, rgba(22, 33, 62, 0.95), rgba(15, 52, 96, 0.9)) !important;
-    border: 2px solid rgba(233, 69, 96, 0.3) !important;
-    border-radius: 8px !important;
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 0px !important;
     text-align: center !important;
     cursor: pointer !important;
-    transition: all 0.3s ease !important;
+    transition: all 0.2s ease !important;
     font-size: 0.9rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
     min-height: 45px !important;
     backdrop-filter: none !important;
+    position: relative;
+}
+
+/* Corner accent for agents */
+.agent-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 6px 0 0;
+    border-color: var(--text-muted) transparent transparent transparent;
+    transition: all 0.2s;
 }
 
 .agent-option:hover {
     border-color: var(--color-accent) !important;
-    background: linear-gradient(145deg, rgba(233, 69, 96, 0.2), rgba(15, 52, 96, 0.9)) !important;
-    transform: scale(1.05) !important;
-    box-shadow: 0 0 15px rgba(233, 69, 96, 0.4) !important;
+    background: rgba(255, 70, 85, 0.1) !important;
+    color: var(--text-primary) !important;
+    transform: translateY(-2px) !important;
+}
+
+.agent-option:hover::before {
+    border-color: var(--color-accent) transparent transparent transparent;
 }
 
 .agent-option.selected {
     border-color: var(--color-accent) !important;
-    background: linear-gradient(145deg, rgba(233, 69, 96, 0.3), rgba(15, 52, 96, 0.95)) !important;
-    box-shadow: 0 0 20px rgba(233, 69, 96, 0.5) !important;
-    transform: scale(1.05) !important;
+    background: var(--color-accent) !important;
+    color: white !important;
+    box-shadow: var(--shadow-neon) !important;
+    transform: none !important;
 }
 
 /* Light theme agent options */
@@ -233,33 +258,32 @@
 
 /* VALORANT Match Cards */
 .valorant-match-card {
-    background: linear-gradient(145deg, 
-        rgba(22, 33, 62, 0.95), 
-        rgba(26, 26, 46, 0.9)
-    );
-    border: 2px solid rgba(233, 69, 96, 0.3);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--text-muted); /* Default border */
+    border-radius: 0px;
     padding: 1.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     cursor: pointer;
+    position: relative;
 }
 
 .valorant-match-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(233, 69, 96, 0.3);
-    border-color: rgba(233, 69, 96, 0.6);
+    transform: translateX(4px); /* Slide right instead of up */
+    background: rgba(236, 232, 225, 0.08);
 }
 
 .valorant-match-card.win {
-    border-left: 4px solid #00c896;
+    border-left: 4px solid var(--color-success);
 }
 
 .valorant-match-card.loss {
-    border-left: 4px solid #ff4655;
+    border-left: 4px solid var(--color-danger);
+    background: linear-gradient(90deg, rgba(255, 70, 85, 0.05) 0%, transparent 100%);
 }
 
 .valorant-match-card.draw {
-    border-left: 4px solid #ffb800;
+    border-left: 4px solid var(--color-warning);
 }
 
 .match-card-header {
@@ -909,9 +933,9 @@
     min-height: 64px;
     max-width: 64px;
     max-height: 64px;
-    border-radius: 50%;
-    background: transparent;
-    border: none;
+    border-radius: 0; /* Square/Angular */
+    background: var(--bg-secondary);
+    border: 1px solid var(--color-accent);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     padding: 0;
@@ -921,21 +945,23 @@
     z-index: 1000;
     transition: all 0.3s ease;
     overflow: hidden;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 .floating-chat-btn .chat-btn-icon {
-    width: 64px;
-    height: 64px;
-    max-width: 64px;
-    max-height: 64px;
-    object-fit: cover;
-    border-radius: 50%;
+    width: 32px; /* Smaller icon fit inside */
+    height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    object-fit: contain;
+    border-radius: 0;
     display: block;
 }
 
 .floating-chat-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+    background: var(--color-accent);
+    box-shadow: 0 6px 30px rgba(255, 70, 85, 0.4);
 }
 
 .floating-chat-btn:active {
@@ -953,8 +979,8 @@
     max-height: calc(100vh - 120px);
     background: var(--bg-primary);
     border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border-radius: 0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     z-index: 1001;

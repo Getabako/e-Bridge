@@ -3,113 +3,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  /* Default Dark Mode Colors - Premium Cyberpunk Theme */
-  --bg-primary: #0a0e14;
-  --bg-secondary: #141b24;
-  --bg-card: #1a232e;
-  --bg-elevated: #1f2937;
-  --text-primary: #f0f4f8;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  /* Accent Colors - Vibrant Neon Palette */
-  --color-primary: #06b6d4;
-  --color-accent: #f43f5e;
-  --color-accent-light: #fb7185;
-  --color-success: #10b981;
+  /* VALORANT Theme Colors */
+  --bg-primary: #0f1923; /* Dark Slate Blue */
+  --bg-secondary: #1f2731; /* Lighter Slate */
+  --bg-card: rgba(236, 232, 225, 0.05); /* Proper matte glass feel */
+  --bg-elevated: #28303b;
+  
+  /* Text Colors */
+  --text-primary: #ece8e1; /* White/Beige */
+  --text-secondary: #9daeb6; /* Muted Blue/Gray */
+  --text-muted: #5f6e7c;
+  
+  /* Brand Colors */
+  --color-primary: #ff4655; /* VALORANT Red */
+  --color-accent: #ff4655;
+  --color-accent-light: #ff808b;
+  --color-success: #10b981; /* Default success is fine, maybe tweak to be more tactical */
   --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
+  --color-danger: #ff4655;
+  --color-info: #0f1923; /* Dark background for info */
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #ff4655 0%, #db3542 100%);
+  --gradient-accent: linear-gradient(90deg, #ff4655 0%, #ff4655 100%); /* Solid red usually fits better, but gradient for flare */
+  --gradient-gaming: linear-gradient(135deg, #0f1923 0%, #1f2731 100%);
+  
+  /* Glass Effect - Matte tactical glass */
+  --glass-bg: rgba(15, 25, 35, 0.95);
+  --glass-border: rgba(236, 232, 225, 0.1);
+  --glass-border-accent: rgba(255, 70, 85, 0.5);
+  --backdrop-blur: blur(8px);
+  --backdrop-saturate: saturate(100%);
 
-  /* Gradient Accents */
-  --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
-  --gradient-accent: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #a855f7 100%);
-  --gradient-success: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-  --gradient-gaming: linear-gradient(135deg, #f43f5e 0%, #ff6b6b 25%, #ffa500 50%, #f43f5e 100%);
-  --gradient-cyber: linear-gradient(135deg, #00f5ff 0%, #00d4ff 50%, #0099ff 100%);
-
-  /* Glass Effect - Enhanced */
-  --glass-bg: rgba(26, 35, 46, 0.85);
-  --glass-border: rgba(6, 182, 212, 0.15);
-  --glass-border-accent: rgba(244, 63, 94, 0.25);
-  --backdrop-blur: blur(16px);
-  --backdrop-saturate: saturate(180%);
-
-  /* Premium Shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-small: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-large: 0 16px 48px rgba(0, 0, 0, 0.6);
-  --shadow-neon: 0 0 30px rgba(6, 182, 212, 0.4);
-  --shadow-neon-accent: 0 0 30px rgba(244, 63, 94, 0.4);
-  --shadow-glow: 0 0 60px rgba(6, 182, 212, 0.2), 0 0 100px rgba(6, 182, 212, 0.1);
-
-  /* Card Effects */
-  --card-shine: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
-  --card-border-gradient: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(244, 63, 94, 0.3));
-
-  /* Animation Timings */
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
-/* Light Theme Variables - Premium Light Mode */
-[data-theme="light"] {
-  /* Light Mode Colors - Clean & Professional */
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-elevated: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-
-  /* Light Mode Accent Colors */
-  --color-primary: #0891b2;
-  --color-accent: #e11d48;
-  --color-accent-light: #fb7185;
-  --color-success: #059669;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-info: #2563eb;
-
-  /* Light Mode Gradients */
-  --gradient-primary: linear-gradient(135deg, #0891b2 0%, #0284c7 50%, #6366f1 100%);
-  --gradient-accent: linear-gradient(135deg, #e11d48 0%, #db2777 50%, #9333ea 100%);
-
-  /* Light Mode Glass Effect */
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --glass-border-accent: rgba(225, 29, 72, 0.15);
-  --glass-highlight: rgba(255, 255, 255, 0.95);
-
-  /* Light Mode Shadows */
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-small: 0 2px 8px rgba(15, 23, 42, 0.08);
-  --shadow-medium: 0 4px 16px rgba(15, 23, 42, 0.12);
-  --shadow-large: 0 12px 32px rgba(15, 23, 42, 0.16);
-  --shadow-premium: 0 20px 40px rgba(15, 23, 42, 0.15);
-  --shadow-neon: 0 0 20px rgba(8, 145, 178, 0.2);
-  --shadow-neon-accent: 0 0 20px rgba(225, 29, 72, 0.2);
-
-  /* Light Mode Card Effects */
-  --card-shine: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.3) 100%);
-  --card-border: rgba(226, 232, 240, 1);
-}
-
-  /* Borders */
-  --border-radius: 12px;
-  --border-radius-small: 8px;
-  --border-radius-large: 20px;
-  --border-radius-xl: 28px;
-  --border-radius-full: 9999px;
-
-  /* Transitions */
-  --transition-fast: all 0.15s var(--ease-smooth);
-  --transition-base: all 0.25s var(--ease-smooth);
-  --transition-slow: all 0.4s var(--ease-smooth);
-  --transition-bounce: all 0.5s var(--ease-bounce);
-
+  /* Shadows - Sharp and subtle */
+  --shadow-xs: 0 1px 0 rgba(0,0,0,0.2);
+  --shadow-small: 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-medium: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-large: 0 12px 24px rgba(0,0,0,0.5);
+  --shadow-neon: 0 0 10px rgba(255, 70, 85, 0.3);
+  --shadow-neon-accent: 0 0 15px rgba(255, 70, 85, 0.4);
+  
+  /* Borders & Radius */
+  --border-radius: 0px; /* Sharp corners */
+  --border-radius-small: 0px;
+  --border-radius-large: 0px;
+  --border-radius-xl: 0px;
+  --border-radius-full: 0px; /* Even full radius should be sharp or cut */
+  
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -117,9 +57,11 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
-
+  
   /* Typography */
+  --font-primary: 'Inter', -apple-system, sans-serif;
+  --font-display: 'Oswald', 'DIN Next LT Pro', 'Arial Narrow', sans-serif; /* Condensed tactical font */
+  
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -127,23 +69,31 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 2rem;
-  --font-size-4xl: 2.5rem;
-  --font-size-5xl: 3rem;
-
-  /* Typography enhancements */
-  --line-height-tight: 1.2;
+  --font-size-4xl: 3rem;
+  --font-size-5xl: 4rem;
+  
   --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
-  --letter-spacing-tighter: -0.05em;
-  --letter-spacing-tight: -0.025em;
-  --letter-spacing-normal: 0;
-  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wide: 0.05em;
   --letter-spacing-wider: 0.1em;
-
-  /* Font Families */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Orbitron', 'Inter', sans-serif;
+  
+  /* Transitions */
+  --transition-fast: all 0.1s ease-out;
+  --transition-base: all 0.2s ease-out;
 }
+
+/* Force Dark Mode - Valorant is always dark/tactical */
+[data-theme="light"] {
+  /* Override light theme to match dark theme (VALORANT doesn't have a light mode) */
+  --bg-primary: #0f1923;
+  --bg-secondary: #1f2731;
+  --bg-card: rgba(236, 232, 225, 0.05);
+  --text-primary: #ece8e1;
+  --text-secondary: #9daeb6;
+  --bg-elevated: #28303b;
+  --glass-bg: rgba(15, 25, 35, 0.95);
+  --glass-border: rgba(236, 232, 225, 0.1);
+}
+
 
 /* Base Styles */
 * {
