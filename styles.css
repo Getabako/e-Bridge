@@ -10755,3 +10755,142 @@ input[type="date"]:focus {
     height: calc(100vh - 100px);
   }
 }
+
+/* ===== Strategy Guide Management Styles ===== */
+.guide-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.guide-stats span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guide-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+}
+
+.guide-form input,
+.guide-form select,
+.guide-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.guide-form input:focus,
+.guide-form select:focus,
+.guide-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.guide-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.guide-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.guide-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: border-color 0.2s ease;
+}
+
+.guide-item:hover {
+  border-color: var(--color-primary);
+}
+
+.guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.guide-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.guide-category {
+  font-size: 12px;
+  padding: 3px 8px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 4px;
+}
+
+.guide-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.guide-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-small.btn-danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.btn-small.btn-danger:hover {
+  background: #dc2626;
+}
+
+.no-guides {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px;
+  font-style: italic;
+}

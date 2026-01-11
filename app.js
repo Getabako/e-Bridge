@@ -714,6 +714,9 @@ class App {
         // Valorant API連携イベントリスナー
         this.setupValorantAPIListeners();
 
+        // 攻略ガイド管理イベントリスナー
+        this.setupStrategyGuideListeners();
+
         // イベントリスナー設定完了フラグを設定
         this.isEventListenersSetup = true;
         console.log('イベントリスナーの設定が完了しました。');
@@ -9069,6 +9072,155 @@ ${matchStats.topMaps.map(m => `- ${m.map}: ${m.matches}試合 (勝率${m.winRate
                 </button>
             </div>
         `;
+    }
+
+    // 攻略ガイド管理イベントリスナーのセットアップ
+    setupStrategyGuideListeners() {
+        // ガイド追加ボタン
+        const addGuideBtn = document.getElementById('add-guide-btn');
+        if (addGuideBtn) {
+            addGuideBtn.addEventListener('click', () => {
+                this.handleAddGuide();
+            });
+        }
+
+        // ガイドリセットボタン
+        const resetGuidesBtn = document.getElementById('reset-guides-btn');
+        if (resetGuidesBtn) {
+            resetGuidesBtn.addEventListener('click', () => {
+                if (confirm('攻略ガイドをデフォルトに戻しますか？追加したガイドは削除されます。')) {
+                    if (window.strategyGuideService) {
+                        window.strategyGuideService.resetToDefault();
+                        this.renderGuideList();
+                        this.updateGuideStats();
+                        alert('攻略ガイドをリセットしました。');
+                    }
+                }
+            });
+        }
+
+        // 初期表示
+        this.renderGuideList();
+        this.updateGuideStats();
+
+        console.log('攻略ガイド管理リスナーの設定が完了しました。');
+    }
+
+    // ガイド追加処理
+    handleAddGuide() {
+        const titleInput = document.getElementById('guide-title');
+        const contentInput = document.getElementById('guide-content');
+        const categorySelect = document.getElementById('guide-category');
+
+        if (!titleInput || !contentInput) {
+            console.warn('攻略ガイド入力フォームが見つかりません');
+            return;
+        }
+
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
+        const category = categorySelect ? categorySelect.value : 'general';
+
+        if (!title) {
+            alert('タイトルを入力してください。');
+            titleInput.focus();
+            return;
+        }
+
+        if (!content) {
+            alert('内容を入力してください。');
+            contentInput.focus();
+            return;
+        }
+
+        if (window.strategyGuideService) {
+            window.strategyGuideService.addGuide(title, content, category);
+
+            // フォームをクリア
+            titleInput.value = '';
+            contentInput.value = '';
+            if (categorySelect) {
+                categorySelect.value = 'general';
+            }
+
+            // リスト更新
+            this.renderGuideList();
+            this.updateGuideStats();
+
+            alert('攻略ガイドを追加しました。');
+        }
+    }
+
+    // ガイド削除処理
+    handleDeleteGuide(guideId) {
+        if (confirm('このガイドを削除しますか？')) {
+            if (window.strategyGuideService) {
+                window.strategyGuideService.deleteGuide(guideId);
+                this.renderGuideList();
+                this.updateGuideStats();
+            }
+        }
+    }
+
+    // ガイドリスト表示
+    renderGuideList() {
+        const listContainer = document.getElementById('guide-list');
+        if (!listContainer || !window.strategyGuideService) {
+            return;
+        }
+
+        const guides = window.strategyGuideService.getAllGuides();
+
+        if (guides.length === 0) {
+            listContainer.innerHTML = '<p class="no-guides">登録されたガイドはありません。</p>';
+            return;
+        }
+
+        const categoryLabels = {
+            'general': '一般',
+            'agent': 'エージェント',
+            'map': 'マップ',
+            'aim': 'エイム',
+            'strategy': '戦術',
+            'comprehensive': '総合'
+        };
+
+        listContainer.innerHTML = guides.map(guide => `
+            <div class="guide-item" data-id="${guide.id}">
+                <div class="guide-header">
+                    <span class="guide-title">${this.escapeHtml(guide.title)}</span>
+                    <span class="guide-category">${categoryLabels[guide.category] || guide.category}</span>
+                </div>
+                <div class="guide-preview">${this.escapeHtml(guide.content.substring(0, 100))}${guide.content.length > 100 ? '...' : ''}</div>
+                <div class="guide-actions">
+                    <button class="btn-small btn-danger" onclick="window.app.handleDeleteGuide('${guide.id}')">
+                        削除
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ガイド統計情報更新
+    updateGuideStats() {
+        const statsContainer = document.getElementById('guide-stats');
+        if (!statsContainer || !window.strategyGuideService) {
+            return;
+        }
+
+        const stats = window.strategyGuideService.getStats();
+
+        statsContainer.innerHTML = `
+            <span>登録数: ${stats.totalGuides}件</span>
+            <span>総文字数: ${stats.totalCharacters.toLocaleString()}文字</span>
+        `;
+    }
+
+    // HTML エスケープ
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
 }

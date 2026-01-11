@@ -10,7 +10,7 @@
 - **参考ドキュメント**: https://ai.google.dev/gemini-api/docs/models?hl=ja
 
 ### バージョン管理
-- **現在のバージョン**: `v1.0.4`
+- **現在のバージョン**: `v1.1.0`
 - **バージョン表示場所**: index.html 58行目 `<div class="app-version" id="app-version">`
 - **更新ルール**: 修正・更新のたびにバージョン番号を上げる
   - バグ修正: パッチ番号を上げる (例: v1.0.0 → v1.0.1)

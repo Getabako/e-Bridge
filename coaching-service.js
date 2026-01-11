@@ -105,7 +105,10 @@ class CoachingService {
         const progressStats = this.getProgressStats();
         const goalProgress = this.getGoalProgress(userProfile);
 
-        return `あなたは経験豊富なeスポーツコーチです。以下のプレイヤーの【現在の目標達成】に最適化されたコーチングアドバイスを作成してください。
+        // 攻略ガイドを取得
+        const strategyGuideText = this.getStrategyGuideContext();
+
+        return `あなたは経験豊富なVALORANTコーチです。以下のプレイヤーの【現在の目標達成】に最適化されたコーチングアドバイスを作成してください。
 
 ## プレイヤー情報
 - ゲームジャンル: ${this.getGameGenreDescription(gameGenre)}
@@ -119,12 +122,14 @@ ${goalProgress}
 ## 最近のフィードバック傾向
 ${recentFeedback}
 
-## 重要：目標達成にフォーカスしたアドバイス作成
-今日のアドバイスは以下の目標達成支援に特化してください：
-1. 現在の目標に直接貢献する具体的なアクション
-2. 目標達成のための段階的なステップ
-3. 進捗を測定可能な具体的な指標
-4. モチベーション維持のための成功体験設計
+${strategyGuideText}
+
+## 重要：攻略知識を活用したアドバイス作成
+今日のアドバイスは以下を意識してください：
+1. 上記の攻略知識ベースの内容を参考に、具体的で実践的なアドバイスを提供
+2. エージェントの役割、戦術セオリー、撃ち合いのコツなど攻略に基づいた内容
+3. プレイヤーの目標に直接貢献する具体的なアクション
+4. 進捗を測定可能な具体的な指標
 
 ## 出力形式
 以下のJSON形式で回答してください：
@@ -135,20 +140,36 @@ ${recentFeedback}
   "category": "${gameGenre}",
   "skillLevels": ["${skillLevel}"],
   "headline": "目標達成に直結する魅力的なタイトル（35文字以内）",
-  "coreContent": "目標達成に向けた具体的な戦略とその理由（250-350文字程度）。なぜこのアドバイスが目標達成に重要なのか、どのような効果が期待できるのかを明確に説明し、目標達成への道筋を示してください。",
+  "coreContent": "攻略知識ベースを参考にした具体的な戦略とその理由（250-350文字程度）。エージェントの使い方、戦術、撃ち合いのコツなど具体的な攻略情報を含めてください。",
   "practicalStep": "今日実行すべき目標達成のための具体的なアクション（120文字以内）。測定可能で目標に直結する達成可能なタスクを設定してください。",
   "goalConnection": "このアドバイスが目標達成にどう貢献するかの説明（80文字以内）"
 }
 \`\`\`
 
 ## 注意事項
+- 攻略知識ベースの内容を積極的に活用してください
 - 必ず設定された目標に関連付けたアドバイスにしてください
 - 目標がない場合は、スキル向上につながる新しい目標設定を提案してください
 - プレイヤーのスキルレベルに適した難易度で目標達成をサポートしてください
 - フィードバック履歴を考慮して目標達成の難易度を調整してください
 - 具体的で実行可能、かつ目標達成に直結するアドバイスにしてください
-- 日本語で分かりやすく書いてください
-- ゲーミング用語は適度に使い、必要に応じて説明を加えてください`;
+- 日本語で分かりやすく書いてください`;
+    }
+
+    // 攻略ガイドのコンテキストを取得
+    getStrategyGuideContext() {
+        try {
+            if (window.strategyGuideService) {
+                const guideText = window.strategyGuideService.getGuidesForCoaching(6000);
+                if (guideText && guideText.length > 0) {
+                    return `## VALORANT攻略知識ベース（以下の知識を参考にアドバイスを作成）
+${guideText}`;
+                }
+            }
+        } catch (error) {
+            console.warn('CoachingService: Failed to get strategy guide context:', error);
+        }
+        return '';
     }
 
     // ゲームジャンルの説明を取得

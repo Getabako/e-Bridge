@@ -225,24 +225,46 @@ class GeminiService {
     generateSystemPrompt(context) {
         const { game, stats, goals } = context;
 
+        // 攻略知識ベースを取得
+        const strategyGuideText = this.getStrategyGuideContext();
+
         return `あなたは${game.name}専門のAIコーチです。
 
 【プレイヤー情報】
 - ランク: ${stats.rank}
 - 勝率: ${stats.winRate}
 
+${strategyGuideText}
+
 【重要な回答ルール】
 1. **回答は必ず200字以内**に収めてください
 2. まず相手の発言に**共感や要約**を1文で示す
-3. 具体的なアドバイスを**1-2点だけ**簡潔に伝える
+3. 攻略知識ベースを参考に、具体的なアドバイスを**1-2点だけ**簡潔に伝える
 4. 最後に**質問で終わる**（次のアクションを聞く）
 5. 絵文字は使わない
 6. 日本語で回答
 
 【回答例】
-「エイムが安定しないんですね。練習の成果は必ず出ますよ。まずはデスマッチで15分ウォームアップを試してみては？どのマップで特に苦戦していますか？」
+「エイムが安定しないんですね。練習の成果は必ず出ますよ。攻略によると『切り返し打ち（トトンのリズム）』で2発撃って動くを繰り返すと良いですよ。デスマッチで15分練習してみては？」
 
-会話のキャッチボールを意識し、相手が話しやすい雰囲気を作ってください。`;
+会話のキャッチボールを意識し、相手が話しやすい雰囲気を作ってください。攻略知識ベースの内容を積極的に活用してアドバイスしてください。`;
+    }
+
+    // 攻略知識ベースを取得（チャット用）
+    getStrategyGuideContext() {
+        try {
+            if (window.strategyGuideService) {
+                const guideText = window.strategyGuideService.getGuidesForCoaching(4000);
+                if (guideText && guideText.length > 0) {
+                    return `【VALORANT攻略知識ベース】
+以下の攻略情報を参考にアドバイスしてください：
+${guideText}`;
+                }
+            }
+        } catch (error) {
+            console.warn('GeminiService: Failed to get strategy guide context:', error);
+        }
+        return '';
     }
 
     // エラーハンドリングとリトライロジック（サーバーレス関数経由）
