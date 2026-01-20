@@ -182,12 +182,15 @@ class App {
     
     applyTheme(theme) {
         const root = document.documentElement;
-        const themeBtn = document.getElementById('theme-toggle-btn');
-        
+        const darkIcon = document.getElementById('theme-icon-dark');
+        const lightIcon = document.getElementById('theme-icon-light');
+
         if (theme === 'light') {
             root.setAttribute('data-theme', 'light');
-            if (themeBtn) themeBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
-            
+            // ライトモード時は太陽アイコン（クリックでダークに戻る）を表示
+            if (darkIcon) darkIcon.style.display = 'none';
+            if (lightIcon) lightIcon.style.display = 'inline-block';
+
             // ライトモードのスタイル
             root.style.setProperty('--bg-primary', '#ffffff');
             root.style.setProperty('--bg-secondary', '#f5f5f5');
@@ -199,8 +202,10 @@ class App {
             root.style.setProperty('--accent-secondary', '#0052a3');
         } else {
             root.setAttribute('data-theme', 'dark');
-            if (themeBtn) themeBtn.textContent = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-            
+            // ダークモード時は月アイコン（クリックでライトに切り替え）を表示
+            if (darkIcon) darkIcon.style.display = 'inline-block';
+            if (lightIcon) lightIcon.style.display = 'none';
+
             // ダークモードのスタイル
             root.style.setProperty('--bg-primary', '#1a1a2e');
             root.style.setProperty('--bg-secondary', '#16213e');
