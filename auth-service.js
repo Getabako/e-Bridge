@@ -436,8 +436,23 @@ const authService = new AuthService();
 
 // Supabaseクライアントが準備できたら初期化
 document.addEventListener('DOMContentLoaded', async () => {
-  // 少し待ってからSupabaseの初期化をチェック
-  setTimeout(async () => {
-    await authService.init();
-  }, 100);
+  // Supabaseクライアントが利用可能になるまで待機（最大5秒）
+  let attempts = 0;
+  const maxAttempts = 50;
+
+  const waitForSupabase = async () => {
+    while (!window.supabaseClient && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+
+    if (window.supabaseClient) {
+      await authService.init();
+      console.log('AuthService initialized with Supabase');
+    } else {
+      console.error('Supabase client not available after timeout');
+    }
+  };
+
+  await waitForSupabase();
 });

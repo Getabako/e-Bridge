@@ -898,11 +898,20 @@ class App {
     
     // 登録処理
     async handleRegister() {
-        const username = document.getElementById('register-username').value;
-        const email = document.getElementById('register-email').value;
-        const riotId = document.getElementById('register-riot-id').value;
-        const password = document.getElementById('register-password').value;
-        const passwordConfirm = document.getElementById('register-password-confirm').value;
+        console.log('handleRegister called');
+
+        const username = document.getElementById('register-username')?.value;
+        const email = document.getElementById('register-email')?.value;
+        const riotId = document.getElementById('register-riot-id')?.value;
+        const password = document.getElementById('register-password')?.value;
+        const passwordConfirm = document.getElementById('register-password-confirm')?.value;
+
+        console.log('Form values:', { username, email, riotId, hasPassword: !!password });
+
+        if (!username || !email || !password) {
+            this.showToast('すべての必須項目を入力してください', 'error');
+            return;
+        }
 
         if (password !== passwordConfirm) {
             this.showToast('パスワードが一致しません', 'error');
@@ -920,9 +929,17 @@ class App {
             this.showLoading(registerBtn, '登録中...');
         }
 
-        if (this.authService) {
+        // authServiceが初期化されているか確認
+        if (this.authService && !this.authService.initialized) {
+            console.log('Waiting for authService initialization...');
+            await this.authService.init();
+        }
+
+        if (this.authService && this.authService.supabase) {
             try {
+                console.log('Calling authService.register...');
                 const result = await this.authService.register(username, password, email, riotId);
+                console.log('Registration result:', result);
                 if (result.success) {
                     this.showToast('登録が完了しました。ログインしてください。', 'success');
                     this.switchTab('login');
@@ -936,11 +953,11 @@ class App {
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                this.showToast('登録に失敗しました', 'error');
+                this.showToast('登録に失敗しました: ' + error.message, 'error');
             }
         } else {
-            // モック登録
-            this.showToast('登録が完了しました', 'success');
+            console.error('AuthService not initialized or Supabase not available');
+            this.showToast('サーバーに接続できません。ページを再読み込みしてください。', 'error');
             this.switchTab('login');
         }
 
