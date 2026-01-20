@@ -247,14 +247,26 @@ class App {
     updateUserDisplay(username, isGuest = false) {
         const headerUserName = document.getElementById('header-user-name');
         const userTypeIndicator = document.getElementById('user-type-indicator');
-        
+        const loginMenuBtn = document.getElementById('login-menu-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
         if (headerUserName) {
             headerUserName.textContent = username;
         }
-        
+
         if (userTypeIndicator) {
             userTypeIndicator.textContent = isGuest ? 'ゲスト' : 'ユーザー';
             userTypeIndicator.className = isGuest ? 'user-type guest' : 'user-type registered';
+        }
+
+        // メニュー項目の表示切り替え
+        if (loginMenuBtn) {
+            // ゲストまたは未ログインの場合は「ログイン/新規登録」を表示
+            loginMenuBtn.style.display = isGuest ? 'flex' : 'none';
+        }
+        if (logoutBtn) {
+            // 常に表示（ゲストでもログアウト可能）
+            logoutBtn.style.display = 'flex';
         }
     }
     
@@ -559,10 +571,44 @@ class App {
             });
         }
         
+        // ユーザーメニューのトグル
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userMenuBtn.classList.toggle('active');
+                userDropdown.classList.toggle('hidden');
+            });
+
+            // メニュー外クリックで閉じる
+            document.addEventListener('click', (e) => {
+                if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userMenuBtn.classList.remove('active');
+                    userDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // ログインメニューボタン
+        const loginMenuBtn = document.getElementById('login-menu-btn');
+        if (loginMenuBtn) {
+            loginMenuBtn.addEventListener('click', () => {
+                // ドロップダウンを閉じる
+                if (userMenuBtn) userMenuBtn.classList.remove('active');
+                if (userDropdown) userDropdown.classList.add('hidden');
+                // ログインモーダルを表示
+                this.showLoginModal();
+            });
+        }
+
         // ログアウトボタン
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
+                // ドロップダウンを閉じる
+                if (userMenuBtn) userMenuBtn.classList.remove('active');
+                if (userDropdown) userDropdown.classList.add('hidden');
                 this.handleLogout();
             });
         }
