@@ -4,9 +4,46 @@ const SUPABASE_URL = 'https://gbxtarqfynmimphzoftj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdieHRhcnFmeW5taW1waHpvZnRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM2MjMsImV4cCI6MjA4NDQxOTYyM30.9RmoU4xbS8rqVlQ00oecxKSzaNBzNP2-r2LMqE14Oz0';
 
 // Supabaseクライアントを初期化
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+function initSupabaseClient() {
+  try {
+    // Supabase SDK v2 CDN版の様々なアクセス方法を試す
+    let createClient = null;
 
-// グローバルに公開
-window.supabaseClient = supabase;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      createClient = window.supabase.createClient;
+      console.log('Using window.supabase.createClient');
+    } else if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+      createClient = supabase.createClient;
+      console.log('Using supabase.createClient');
+    } else if (window.Supabase && typeof window.Supabase.createClient === 'function') {
+      createClient = window.Supabase.createClient;
+      console.log('Using window.Supabase.createClient');
+    }
 
-console.log('Supabase client initialized');
+    if (createClient) {
+      const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      window.supabaseClient = client;
+      console.log('Supabase client initialized successfully');
+      return client;
+    } else {
+      console.error('Supabase SDK not found. Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('supa')));
+      return null;
+    }
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+    return null;
+  }
+}
+
+// 即座に初期化を試みる
+const supabaseClient = initSupabaseClient();
+
+// DOMContentLoadedでも再試行
+if (!supabaseClient) {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.supabaseClient) {
+      console.log('Retrying Supabase initialization on DOMContentLoaded...');
+      initSupabaseClient();
+    }
+  });
+}
