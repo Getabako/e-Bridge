@@ -1176,9 +1176,43 @@ body::before {
 [data-theme="light"] .form-group select:hover,
 [data-theme="light"] .form-group textarea:hover {
   border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 
+  box-shadow:
     inset 0 1px 3px rgba(15, 23, 42, 0.06),
     0 2px 4px rgba(59, 130, 246, 0.08);
+}
+
+/* パスワード表示/非表示切り替え */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: var(--color-accent);
+}
+
+.password-toggle i {
+  font-size: 16px;
 }
 
 .form-group input:focus,

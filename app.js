@@ -596,7 +596,27 @@ class App {
                 this.handleGuestAccess();
             });
         }
-        
+
+        // パスワード表示/非表示切り替え
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        passwordToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.dataset.target;
+                const input = document.getElementById(targetId);
+                const icon = toggle.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
         // ユーザーメニューのトグル
         const userMenuBtn = document.getElementById('user-menu-btn');
         const userDropdown = document.getElementById('user-dropdown');
