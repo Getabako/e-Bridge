@@ -104,34 +104,40 @@ class AuthService {
       }
 
       if (data.user) {
-        // プロフィールテーブルを更新
-        const { error: profileError } = await this.supabase
-          .from('profiles')
-          .upsert({
+        // メール確認が必要かどうか（セッションがない場合は確認が必要）
+        const needsEmailConfirmation = !data.session;
+
+        // プロフィールテーブルを更新（メール確認不要の場合のみ）
+        if (!needsEmailConfirmation) {
+          const { error: profileError } = await this.supabase
+            .from('profiles')
+            .upsert({
+              id: data.user.id,
+              username: username,
+              riot_id_name: riotIdName,
+              riot_id_tag: riotIdTag,
+              updated_at: new Date().toISOString()
+            });
+
+          if (profileError) {
+            console.error('Profile update error:', profileError);
+          }
+
+          this.currentUser = data.user;
+          this.currentProfile = {
             id: data.user.id,
             username: username,
             riot_id_name: riotIdName,
-            riot_id_tag: riotIdTag,
-            updated_at: new Date().toISOString()
-          });
-
-        if (profileError) {
-          console.error('Profile update error:', profileError);
+            riot_id_tag: riotIdTag
+          };
         }
-
-        this.currentUser = data.user;
-        this.currentProfile = {
-          id: data.user.id,
-          username: username,
-          riot_id_name: riotIdName,
-          riot_id_tag: riotIdTag
-        };
 
         return {
           success: true,
           userId: data.user.id,
           riotId: riotIdName && riotIdTag ? { name: riotIdName, tag: riotIdTag } : null,
-          message: '登録が完了しました'
+          needsEmailConfirmation: needsEmailConfirmation,
+          message: needsEmailConfirmation ? '確認メールを送信しました' : '登録が完了しました'
         };
       }
 

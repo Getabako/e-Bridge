@@ -961,7 +961,12 @@ class App {
                 const result = await this.authService.register(username, password, email, riotId);
                 console.log('Registration result:', result);
                 if (result.success) {
-                    this.showToast('登録が完了しました。ログインしてください。', 'success');
+                    // 確認メールが必要かどうかをチェック
+                    if (result.needsEmailConfirmation) {
+                        this.showToast('確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。', 'info', 8000);
+                    } else {
+                        this.showToast('登録が完了しました。ログインしてください。', 'success');
+                    }
                     this.switchTab('login');
                     // メールアドレスを自動入力
                     const loginInput = document.getElementById('login-username');
@@ -3018,20 +3023,20 @@ class App {
     }
     
     // トースト表示
-    showToast(message, type = 'info') {
+    showToast(message, type = 'info', duration = 3000) {
         const container = document.getElementById('toast-container');
         if (!container) return;
-        
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.textContent = message;
-        
+
         container.appendChild(toast);
-        
+
         setTimeout(() => {
             toast.classList.add('show');
         }, 100);
-        
+
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => {
@@ -3039,7 +3044,7 @@ class App {
                     container.removeChild(toast);
                 }
             }, 300);
-        }, 3000);
+        }, duration);
     }
     
     // ローディング表示（ボタン内スピナー対応）
