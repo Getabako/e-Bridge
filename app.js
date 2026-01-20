@@ -219,20 +219,33 @@ class App {
     }
     
     // 認証チェック
-    checkAuthentication() {
-        const storedUser = sessionStorage.getItem('currentUser');
+    async checkAuthentication() {
+        // authServiceの初期化を待つ
+        if (this.authService && !this.authService.initialized) {
+            await this.authService.init();
+        }
+
+        // Supabaseセッションを確認
+        if (this.authService) {
+            const user = this.authService.getCurrentUser();
+            if (user) {
+                this.currentUser = user;
+                this.updateUserDisplay(user.username);
+                // Riot ID設定を復元
+                this.restoreUserValorantSettings();
+                return true; // 認証済み
+            }
+        }
+
+        // ゲストセッションを確認
         const isGuest = sessionStorage.getItem('isGuest');
-        
-        if (storedUser) {
-            this.currentUser = JSON.parse(storedUser);
-            this.updateUserDisplay(this.currentUser.username);
-        } else if (isGuest === 'true') {
+        if (isGuest === 'true') {
             this.isGuest = true;
             this.updateUserDisplay('ゲストユーザー', true);
-        } else {
-            // ログインモーダルを表示
-            this.showLoginModal();
+            return true; // ゲストとして認証済み
         }
+
+        return false; // 未認証
     }
     
     showLoginModal() {
@@ -371,12 +384,12 @@ class App {
             window.unifiedApiManager.updateLegacyAPIKeys();
         }
         
-        // ログインチェック
-        this.checkAuthentication();
-        
+        // ログインチェック（非同期でSupabaseセッションを確認）
+        const isAuthenticated = await this.checkAuthentication();
+
         // 残りの初期化を実行
         this.continueInitialization();
-        
+
         // ゲーム選択とダッシュボード機能の初期化
         this.initGameSelection();
         this.initializeSkillLevel();
@@ -390,23 +403,25 @@ class App {
 
         // その他のナビゲーション機能
         this.initNavigationHelpers();
-        
+
         // 連勝記録の初期化
         this.initWinStreak();
-        
+
         // 初期ページの表示
         this.showPage(this.currentPage);
-        
+
         // チャートの初期化
         this.initCharts();
-        
+
         // データのロード
         this.loadUserData();
-        
-        // ログイン画面を表示
-        setTimeout(() => {
-            this.showLoginModal();
-        }, 100);
+
+        // 未認証の場合のみログイン画面を表示
+        if (!isAuthenticated) {
+            setTimeout(() => {
+                this.showLoginModal();
+            }, 100);
+        }
         
         // 初期化完了フラグを設定
         this.isMainAppInitialized = true;
@@ -807,32 +822,46 @@ class App {
     }
     
     // ログイン処理
-    handleLogin() {
-        const username = document.getElementById('login-username').value;
+    async handleLogin() {
+        const email = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
 
+        const loginBtn = document.getElementById('login-btn');
+        if (loginBtn) {
+            this.showLoading(loginBtn, 'ログイン中...');
+        }
+
         if (this.authService) {
-            const result = this.authService.login(username, password);
-            if (result.success) {
-                this.currentUser = result.user;
-                this.updateUserDisplay(username);
-                this.hideLoginModal();
-                this.loadUserData();
+            try {
+                const result = await this.authService.login(email, password);
+                if (result.success) {
+                    this.currentUser = result.user;
+                    this.updateUserDisplay(result.user.username);
+                    this.hideLoginModal();
+                    this.loadUserData();
 
-                // Riot ID設定を復元し、valorantAPIServiceに設定
-                this.restoreUserValorantSettings();
+                    // Riot ID設定を復元し、valorantAPIServiceに設定
+                    this.restoreUserValorantSettings();
 
-                this.showToast('ログインしました', 'success');
-            } else {
-                this.showToast(result.message, 'error');
+                    this.showToast('ログインしました', 'success');
+                } else {
+                    this.showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                this.showToast('ログインに失敗しました', 'error');
             }
         } else {
             // モックログイン
-            this.currentUser = { username: username };
+            this.currentUser = { username: email };
             sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-            this.updateUserDisplay(username);
+            this.updateUserDisplay(email);
             this.hideLoginModal();
             this.showToast('ログインしました', 'success');
+        }
+
+        if (loginBtn) {
+            this.hideLoading(loginBtn);
         }
     }
 
@@ -868,7 +897,7 @@ class App {
     }
     
     // 登録処理
-    handleRegister() {
+    async handleRegister() {
         const username = document.getElementById('register-username').value;
         const email = document.getElementById('register-email').value;
         const riotId = document.getElementById('register-riot-id').value;
@@ -886,18 +915,37 @@ class App {
             return;
         }
 
+        const registerBtn = document.getElementById('register-btn');
+        if (registerBtn) {
+            this.showLoading(registerBtn, '登録中...');
+        }
+
         if (this.authService) {
-            const result = this.authService.register(username, password, email, riotId);
-            if (result.success) {
-                this.showToast('登録が完了しました。ログインしてください。', 'success');
-                this.switchTab('login');
-            } else {
-                this.showToast(result.message, 'error');
+            try {
+                const result = await this.authService.register(username, password, email, riotId);
+                if (result.success) {
+                    this.showToast('登録が完了しました。ログインしてください。', 'success');
+                    this.switchTab('login');
+                    // メールアドレスを自動入力
+                    const loginInput = document.getElementById('login-username');
+                    if (loginInput) {
+                        loginInput.value = email;
+                    }
+                } else {
+                    this.showToast(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                this.showToast('登録に失敗しました', 'error');
             }
         } else {
             // モック登録
             this.showToast('登録が完了しました', 'success');
             this.switchTab('login');
+        }
+
+        if (registerBtn) {
+            this.hideLoading(registerBtn);
         }
     }
     
@@ -911,11 +959,15 @@ class App {
     }
     
     // ログアウト
-    handleLogout() {
+    async handleLogout() {
+        if (this.authService) {
+            await this.authService.logout();
+        }
         this.currentUser = null;
         this.isGuest = false;
         sessionStorage.removeItem('currentUser');
         sessionStorage.removeItem('isGuest');
+        this.updateUserDisplay(null);
         this.showLoginModal();
         this.showToast('ログアウトしました', 'info');
     }
