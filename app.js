@@ -231,9 +231,15 @@ class App {
     }
     
     showLoginModal() {
+        console.log('showLoginModal called');
         const modal = document.getElementById('login-modal');
+        console.log('login-modal element:', modal);
         if (modal) {
             modal.classList.remove('hidden');
+            modal.style.display = 'flex'; // 確実に表示
+            console.log('Login modal should now be visible');
+        } else {
+            console.error('login-modal element not found!');
         }
     }
     
@@ -593,13 +599,18 @@ class App {
         // ログインメニューボタン
         const loginMenuBtn = document.getElementById('login-menu-btn');
         if (loginMenuBtn) {
-            loginMenuBtn.addEventListener('click', () => {
+            loginMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Login menu button clicked');
                 // ドロップダウンを閉じる
                 if (userMenuBtn) userMenuBtn.classList.remove('active');
                 if (userDropdown) userDropdown.classList.add('hidden');
                 // ログインモーダルを表示
                 this.showLoginModal();
             });
+        } else {
+            console.warn('login-menu-btn not found');
         }
 
         // ログアウトボタン
