@@ -7,27 +7,47 @@ class AuthService {
     this.guestData = {};
   }
 
-  register(username, password, email) {
+  register(username, password, email, riotId = null) {
     if (this.users[username]) {
       return { success: false, message: 'ユーザー名は既に使用されています' };
     }
-    
+
     const userId = 'user_' + Date.now();
     const hashedPassword = this.hashPassword(password);
-    
+
+    // Riot IDをパース（例: "PlayerName#JP1" → { name: "PlayerName", tag: "JP1" }）
+    let parsedRiotId = null;
+    if (riotId) {
+      const parts = riotId.split('#');
+      if (parts.length === 2) {
+        parsedRiotId = {
+          name: parts[0].trim(),
+          tag: parts[1].trim()
+        };
+      }
+    }
+
     this.users[username] = {
       id: userId,
       username: username,
       email: email,
       password: hashedPassword,
+      riotId: parsedRiotId,
       createdAt: new Date().toISOString(),
       games: [],
       settings: {},
-      data: {}
+      data: {
+        valorant_settings: parsedRiotId ? {
+          riotId: parsedRiotId,
+          region: 'ap',
+          platform: 'pc',
+          lastUpdated: new Date().toISOString()
+        } : null
+      }
     };
-    
+
     localStorage.setItem('users', JSON.stringify(this.users));
-    return { success: true, userId: userId };
+    return { success: true, userId: userId, riotId: parsedRiotId };
   }
 
   login(username, password) {

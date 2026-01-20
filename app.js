@@ -748,7 +748,7 @@ class App {
     handleLogin() {
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
-        
+
         if (this.authService) {
             const result = this.authService.login(username, password);
             if (result.success) {
@@ -756,6 +756,10 @@ class App {
                 this.updateUserDisplay(username);
                 this.hideLoginModal();
                 this.loadUserData();
+
+                // Riot ID設定を復元し、valorantAPIServiceに設定
+                this.restoreUserValorantSettings();
+
                 this.showToast('ログインしました', 'success');
             } else {
                 this.showToast(result.message, 'error');
@@ -769,21 +773,59 @@ class App {
             this.showToast('ログインしました', 'success');
         }
     }
+
+    // ユーザーのVALORANT設定を復元
+    async restoreUserValorantSettings() {
+        if (!this.authService || !this.currentUser) return;
+
+        // auth-serviceから設定を復元
+        const restored = this.authService.restoreValorantSettings();
+
+        if (restored && window.valorantAPIService) {
+            const riotId = this.authService.getRiotId();
+            if (riotId) {
+                console.log(`Riot ID restored: ${riotId.name}#${riotId.tag}`);
+
+                // valorantAPIServiceにRiot IDを設定
+                window.valorantAPIService.setRiotId(riotId.name, riotId.tag);
+
+                // ユーザーの戦績データを取得（Henrik API経由）
+                try {
+                    const stats = await window.valorantAPIService.getPlayerStats();
+                    if (stats) {
+                        // ローカルストレージにユーザー固有のデータとして保存
+                        const userDataKey = `valorant_stats_${this.currentUser.username}`;
+                        localStorage.setItem(userDataKey, JSON.stringify(stats));
+                        console.log('User VALORANT stats loaded and saved');
+                    }
+                } catch (error) {
+                    console.log('Could not fetch live stats, using cached data if available');
+                }
+            }
+        }
+    }
     
     // 登録処理
     handleRegister() {
         const username = document.getElementById('register-username').value;
         const email = document.getElementById('register-email').value;
+        const riotId = document.getElementById('register-riot-id').value;
         const password = document.getElementById('register-password').value;
         const passwordConfirm = document.getElementById('register-password-confirm').value;
-        
+
         if (password !== passwordConfirm) {
             this.showToast('パスワードが一致しません', 'error');
             return;
         }
-        
+
+        // Riot IDの形式チェック
+        if (riotId && !riotId.includes('#')) {
+            this.showToast('Riot IDは「ゲーム名#タグ」の形式で入力してください', 'error');
+            return;
+        }
+
         if (this.authService) {
-            const result = this.authService.register(username, password, email);
+            const result = this.authService.register(username, password, email, riotId);
             if (result.success) {
                 this.showToast('登録が完了しました。ログインしてください。', 'success');
                 this.switchTab('login');
@@ -2849,29 +2891,44 @@ class App {
         }, 3000);
     }
     
-    // ローディング表示（任意メッセージ対応）
-    showLoading(message = 'ロード中...') {
-        // テキストを更新（重複IDに対応して全て更新）
-        try {
-            const msgNodes = document.querySelectorAll('#loading .loading-content p');
-            if (msgNodes && msgNodes.length > 0) {
-                msgNodes.forEach(p => p.textContent = message);
-            }
-        } catch (e) {
-            console.debug('loading message update skipped:', e);
+    // ローディング表示（ボタン内スピナー対応）
+    // buttonElement: ローディング状態にするボタン要素（省略時は何もしない）
+    // message: ボタンに表示するテキスト（省略時は「処理中...」）
+    showLoading(buttonElementOrMessage = null, message = '処理中...') {
+        // 後方互換性: 文字列のみ渡された場合は旧動作（何もしない）
+        if (typeof buttonElementOrMessage === 'string' || buttonElementOrMessage === null) {
+            // 旧APIとの互換性のため、何もしない（オーバーレイは非表示に変更済み）
+            this._loadingButton = null;
+            return;
         }
 
-        const loading = document.getElementById('loading');
-        if (loading) {
-            loading.classList.remove('hidden');
-        }
+        const button = buttonElementOrMessage;
+        if (!button || !(button instanceof HTMLElement)) return;
+
+        // 現在のローディングボタンを保存
+        this._loadingButton = button;
+        this._loadingButtonOriginalText = button.innerHTML;
+
+        // ボタンをローディング状態に
+        button.disabled = true;
+        button.classList.add('btn-loading');
+        button.innerHTML = `<span class="btn-spinner"></span>${message}`;
     }
-    
-    hideLoading() {
-        const loading = document.getElementById('loading');
-        if (loading) {
-            loading.classList.add('hidden');
+
+    hideLoading(buttonElement = null) {
+        // 引数がない場合は保存されたボタンを使用
+        const button = buttonElement || this._loadingButton;
+
+        if (button && button instanceof HTMLElement) {
+            button.disabled = false;
+            button.classList.remove('btn-loading');
+            if (this._loadingButtonOriginalText) {
+                button.innerHTML = this._loadingButtonOriginalText;
+            }
         }
+
+        this._loadingButton = null;
+        this._loadingButtonOriginalText = null;
     }
     
     // 各ページのロード処理
