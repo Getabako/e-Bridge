@@ -267,6 +267,55 @@ class WhisperService {
     }
 }
 
+/**
+ * 吃音（どもり）を検知してスムーズなテキストに修正
+ * ユーザーには修正後のテキストのみを表示し、安心感を与える
+ */
+function correctStuttering(text) {
+    if (!text) return text;
+
+    // 吃音パターン1: 同じひらがな/カタカナが2回以上連続（例: ぼぼぼぼ → ぼ）
+    // ひらがな
+    let corrected = text.replace(/([ぁ-ん])\1{1,}/g, '$1');
+    // カタカナ
+    corrected = corrected.replace(/([ァ-ヶ])\1{1,}/g, '$1');
+
+    // 吃音パターン2: 同じ音の繰り返しパターン（例: ぼ、ぼ、ぼく → ぼく）
+    // 読点やスペースを挟んだ繰り返しも検知
+    corrected = corrected.replace(/([ぁ-んァ-ヶ])[、,\s]*\1[、,\s]*\1+/g, '$1');
+
+    // 吃音パターン3: 2文字セットの繰り返し（例: おに、おに、おにぎり → おにぎり）
+    corrected = corrected.replace(/([ぁ-んァ-ヶ]{1,2})[、,\s]+\1[、,\s]+/g, '$1');
+
+    // 吃音パターン4: 語頭の繰り返し（例: 「ぼ、僕は」→「僕は」）
+    corrected = corrected.replace(/([ぁ-んァ-ヶ])[、,\s]+([一-龯々])/g, (match, kana, kanji) => {
+        // ひらがなが漢字の読みの一部である可能性が高い場合は削除
+        return kanji;
+    });
+
+    // 吃音パターン5: 長音の過剰な伸ばし（例: あーーー → あー）
+    corrected = corrected.replace(/ー{2,}/g, 'ー');
+
+    // 吃音パターン6: 「っ」の連続（例: えっっっと → えっと）
+    corrected = corrected.replace(/っ{2,}/g, 'っ');
+
+    // 吃音パターン7: フィラー語の繰り返し（例: えー、えー → えー）
+    corrected = corrected.replace(/(えー|あー|うー|あの|えっと)[、,\s]*(えー|あー|うー|あの|えっと)[、,\s]*/gi, '$1、');
+
+    // 先頭・末尾の余分な句読点を整理
+    corrected = corrected.replace(/^[、,\s]+/, '').replace(/[、,\s]+$/, '');
+
+    // 連続した読点を1つに
+    corrected = corrected.replace(/、{2,}/g, '、');
+
+    // 修正があった場合のみログ（デバッグ用、本番では非表示）
+    if (text !== corrected) {
+        console.log('[吃音修正] 適用済み');
+    }
+
+    return corrected;
+}
+
 // グローバルインスタンス
 const whisperService = new WhisperService();
 
@@ -344,12 +393,14 @@ function initWhisperVoiceUI() {
                 isRecording = false;
 
                 if (audioBlob && audioBlob.size > 0) {
-                    const text = await whisperService.transcribe(audioBlob);
+                    const rawText = await whisperService.transcribe(audioBlob);
 
-                    if (text) {
+                    if (rawText) {
+                        // 吃音修正を適用（ユーザーには修正後のみ表示）
+                        const text = correctStuttering(rawText);
                         updateWhisperStatus(`認識結果: "${text}"`);
 
-                        // 入力欄に設定
+                        // 入力欄に修正後のテキストを設定
                         const input = document.getElementById('floating-chat-input');
                         if (input) {
                             input.value = text;
