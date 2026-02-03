@@ -26,17 +26,36 @@ class AuthService {
     }
   }
 
-  // 既存セッションをチェック
+  // 既存セッションをチェック（タイムアウト付き）
   async checkSession() {
+    // Supabase接続エラーの場合はスキップ
+    if (window.supabaseConnectionError) {
+      console.warn('Skipping session check due to Supabase connection error');
+      return;
+    }
+
     try {
-      const { data: { session }, error } = await this.supabase.auth.getSession();
+      // タイムアウト付きでセッションチェック
+      const sessionPromise = this.supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Session check timeout')), 5000)
+      );
+
+      const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]);
+
+      if (error) {
+        console.warn('Session check error:', error.message);
+        return;
+      }
+
       if (session && session.user) {
         this.currentUser = session.user;
         await this.loadProfile();
         console.log('Session restored for:', this.currentUser.email);
       }
     } catch (error) {
-      console.error('Session check error:', error);
+      console.warn('Session check error:', error.message);
+      // エラーでもUIはブロックしない
     }
   }
 

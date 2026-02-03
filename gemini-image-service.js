@@ -5,7 +5,10 @@
 
 class GeminiImageService {
     constructor() {
-        this.apiKey = 'AIzaSyBX5vrS6gUyRPJmeVEeuYhIjDPsMx3V5pY';
+        // 画像生成は無効化（CORSエラー回避のため）
+        // 将来的にはサーバーサイドAPI経由で実装する必要あり
+        this.enabled = false;
+        this.apiKey = null;
         this.flashModel = 'gemini-2.0-flash-exp-image-generation';
         this.proModel = 'imagen-3.0-generate-002';
         this.imageCache = new Map();
@@ -42,128 +45,33 @@ class GeminiImageService {
     }
 
     /**
-     * 小さなアイコン画像を生成（gemini-2.5-flash-image用）
+     * 小さなアイコン画像を生成（無効化 - CORSエラー回避）
      * @param {string} prompt - 画像生成プロンプト
      * @param {string} cacheKey - キャッシュキー
-     * @returns {Promise<string>} - Base64画像データURL
+     * @returns {Promise<string>} - null（無効化）
      */
     async generateSmallIcon(prompt, cacheKey) {
-        // キャッシュチェック
+        // 画像生成は無効化（クライアントからの直接API呼び出しはCORSでブロックされる）
+        // キャッシュがあれば返す
         if (this.imageCache.has(cacheKey)) {
             return this.imageCache.get(cacheKey);
         }
-
-        const enhancedPrompt = `Create a small, clean, minimalist cyberpunk-style icon for: ${prompt}.
-Style: Neon colors (cyan #00f5ff, pink #ff2d6a, purple #bf00ff), dark background, glowing effect, simple geometric shapes, suitable for UI icon.
-Size: Small icon, 64x64 pixels equivalent detail level. No text.`;
-
-        try {
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${this.flashModel}:generateContent?key=${this.apiKey}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: enhancedPrompt
-                            }]
-                        }],
-                        generationConfig: {
-                            responseModalities: ["TEXT", "IMAGE"]
-                        }
-                    })
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response.json();
-                console.error('Gemini API error:', error);
-                throw new Error(error.error?.message || 'Image generation failed');
-            }
-
-            const result = await response.json();
-
-            // 画像データを抽出
-            const imageData = this.extractImageFromResponse(result);
-            if (imageData) {
-                this.imageCache.set(cacheKey, imageData);
-                this.saveCacheToStorage();
-                return imageData;
-            }
-
-            throw new Error('No image in response');
-        } catch (error) {
-            console.error('Small icon generation failed:', error);
-            return null;
-        }
+        return null;
     }
 
     /**
-     * 大きな装飾画像を生成（Imagen 3用）
+     * 大きな装飾画像を生成（無効化 - CORSエラー回避）
      * @param {string} prompt - 画像生成プロンプト
      * @param {string} cacheKey - キャッシュキー
-     * @returns {Promise<string>} - Base64画像データURL
+     * @returns {Promise<string>} - null（無効化）
      */
     async generateLargeImage(prompt, cacheKey) {
-        // キャッシュチェック
+        // 画像生成は無効化（クライアントからの直接API呼び出しはCORSでブロックされる）
+        // キャッシュがあれば返す
         if (this.imageCache.has(cacheKey)) {
             return this.imageCache.get(cacheKey);
         }
-
-        const enhancedPrompt = `${prompt}.
-Style: Cyberpunk gaming aesthetic, neon glow effects, dark futuristic background,
-colors: cyan (#00f5ff), magenta (#ff2d6a), purple (#bf00ff).
-High quality, detailed, suitable for web banner or decorative image.
-VALORANT esports theme, professional gaming atmosphere.`;
-
-        try {
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${this.proModel}:generateImages?key=${this.apiKey}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        prompt: enhancedPrompt,
-                        config: {
-                            numberOfImages: 1,
-                            aspectRatio: "16:9",
-                            outputOptions: {
-                                mimeType: "image/png"
-                            }
-                        }
-                    })
-                }
-            );
-
-            if (!response.ok) {
-                const error = await response.json();
-                console.error('Imagen API error:', error);
-                throw new Error(error.error?.message || 'Image generation failed');
-            }
-
-            const result = await response.json();
-
-            // 画像データを抽出
-            if (result.generatedImages && result.generatedImages[0]) {
-                const base64Data = result.generatedImages[0].image?.bytesBase64Encoded;
-                if (base64Data) {
-                    const imageUrl = `data:image/png;base64,${base64Data}`;
-                    this.imageCache.set(cacheKey, imageUrl);
-                    this.saveCacheToStorage();
-                    return imageUrl;
-                }
-            }
-
-            throw new Error('No image in response');
-        } catch (error) {
-            console.error('Large image generation failed:', error);
-            return null;
-        }
+        return null;
     }
 
     /**
