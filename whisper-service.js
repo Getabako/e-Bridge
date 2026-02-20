@@ -62,21 +62,22 @@ class WhisperService {
         }
 
         try {
-            // マイクへのアクセスを要求
+            // マイクへのアクセスを要求（高品質設定）
             this.stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     channelCount: 1,
                     sampleRate: 16000,
                     echoCancellation: true,
-                    noiseSuppression: true
+                    noiseSuppression: true,
+                    autoGainControl: true
                 }
             });
 
-            // MediaRecorderを作成
+            // MediaRecorderを作成（高ビットレートで音質向上）
             const mimeType = this.getSupportedMimeType();
             this.mediaRecorder = new MediaRecorder(this.stream, {
                 mimeType: mimeType,
-                audioBitsPerSecond: 128000
+                audioBitsPerSecond: 256000
             });
 
             this.audioChunks = [];
@@ -171,9 +172,14 @@ class WhisperService {
      * Whisper APIで文字起こし（サーバーレス関数経由）
      */
     async transcribe(audioBlob) {
-        // 音声が短すぎる場合は警告（10KB未満は約0.5秒以下）
-        if (audioBlob.size < 10000) {
-            console.warn('Audio too short, may cause hallucination');
+        // 音声が極端に短い場合は空を返す（1KB未満はほぼ無音）
+        if (audioBlob.size < 1000) {
+            console.warn('Audio too short, skipping transcription');
+            return '';
+        }
+        // 短い音声は警告のみ
+        if (audioBlob.size < 5000) {
+            console.warn('Audio very short, may cause hallucination');
         }
 
         // 音声ファイルを準備
@@ -185,7 +191,7 @@ class WhisperService {
         formData.append('model', 'whisper-1');
         formData.append('language', 'ja');
         formData.append('response_format', 'verbose_json');
-        formData.append('prompt', 'これはVALORANTというゲームについての質問や会話です。エイム、キルデス比、ランク、エージェント、マップなどについて話しています。');
+        formData.append('prompt', 'これはVALORANTというeスポーツゲームのコーチングに関する会話です。エイム練習、キルデス比、ランクマッチ、コンペティティブ、エージェント（ジェット、レイズ、ソーヴァ、オーメン、セージ等）、マップ（バインド、ヘイヴン、スプリット、アセント等）、ACS、ADR、ヘッドショット率、クロスヘア配置、ピーク、リコイル制御について話しています。日本語で正確に書き起こしてください。');
         formData.append('temperature', '0');
 
         console.log('Sending to Whisper API via server, file type:', audioBlob.type, 'size:', audioBlob.size);
@@ -228,7 +234,9 @@ class WhisperService {
                     'チャンネル登録',
                     'いいねボタン',
                     '字幕',
-                    'ご覧いただき'
+                    'ご覧いただき',
+                    'お疲れ様でした',
+                    'よろしくお願いします'
                 ];
 
                 const text = result.text || '';
@@ -236,6 +244,22 @@ class WhisperService {
                     if (text.includes(phrase) && avgNoSpeechProb > 0.3) {
                         console.warn('Detected likely hallucination phrase:', text);
                         return '';
+                    }
+                }
+
+                // Whisperのセグメント繰り返し検出
+                // 同じテキストのセグメントが連続する場合、重複を除去
+                const segmentTexts = result.segments.map(s => s.text.trim()).filter(t => t.length > 0);
+                if (segmentTexts.length > 1) {
+                    const deduped = [segmentTexts[0]];
+                    for (let i = 1; i < segmentTexts.length; i++) {
+                        if (segmentTexts[i] !== segmentTexts[i - 1]) {
+                            deduped.push(segmentTexts[i]);
+                        }
+                    }
+                    if (deduped.length < segmentTexts.length) {
+                        console.log('[Whisper重複除去] セグメント繰り返しを検出・除去');
+                        return deduped.join('');
                     }
                 }
             }
@@ -268,39 +292,69 @@ class WhisperService {
 }
 
 /**
- * 吃音（どもり）を検知してスムーズなテキストに修正
+ * 吃音（どもり）・繰り返し音を検知してスムーズなテキストに修正
  * ユーザーには修正後のテキストのみを表示し、安心感を与える
  */
 function correctStuttering(text) {
     if (!text) return text;
 
-    // 吃音パターン1: 同じひらがな/カタカナが2回以上連続（例: ぼぼぼぼ → ぼ）
-    // ひらがな
-    let corrected = text.replace(/([ぁ-ん])\1{1,}/g, '$1');
+    let corrected = text;
+
+    // === フェーズ1: 単語・フレーズレベルの繰り返し除去 ===
+
+    // 単語の完全な繰り返し（例: "今日は今日は" → "今日は"、"練習練習" → "練習"）
+    corrected = corrected.replace(/(.{2,8})\1{1,}/g, '$1');
+
+    // 句読点・スペースを挟んだ単語の繰り返し（例: "今日は、今日は" → "今日は"）
+    corrected = corrected.replace(/(.{2,10})[、。,.\s]+\1/g, '$1');
+
+    // === フェーズ2: 文字レベルの吃音修正 ===
+
+    // 同じひらがなが3回以上連続（例: ぼぼぼく → ぼく）
+    // 2回は意図的な場合もあるため3回以上を対象
+    corrected = corrected.replace(/([ぁ-ん])\1{2,}/g, '$1');
     // カタカナ
-    corrected = corrected.replace(/([ァ-ヶ])\1{1,}/g, '$1');
+    corrected = corrected.replace(/([ァ-ヶ])\1{2,}/g, '$1');
 
-    // 吃音パターン2: 同じ音の繰り返しパターン（例: ぼ、ぼ、ぼく → ぼく）
-    // 読点やスペースを挟んだ繰り返しも検知
-    corrected = corrected.replace(/([ぁ-んァ-ヶ])[、,\s]*\1[、,\s]*\1+/g, '$1');
+    // 同じひらがな/カタカナが2回連続で、後ろに同じ文字で始まる語が続く場合
+    // （例: ぼぼく → ぼく）
+    corrected = corrected.replace(/([ぁ-ん])\1([ぁ-ん])/g, '$1$2');
+    corrected = corrected.replace(/([ァ-ヶ])\1([ァ-ヶ])/g, '$1$2');
 
-    // 吃音パターン3: 2文字セットの繰り返し（例: おに、おに、おにぎり → おにぎり）
-    corrected = corrected.replace(/([ぁ-んァ-ヶ]{1,2})[、,\s]+\1[、,\s]+/g, '$1');
+    // 同じ音の繰り返しパターン（例: ぼ、ぼ、ぼく → ぼく）
+    corrected = corrected.replace(/([ぁ-んァ-ヶ])[、,\s]+\1[、,\s]*\1*/g, '$1');
 
-    // 吃音パターン4: 語頭の繰り返し（例: 「ぼ、僕は」→「僕は」）
-    corrected = corrected.replace(/([ぁ-んァ-ヶ])[、,\s]+([一-龯々])/g, (match, kana, kanji) => {
-        // ひらがなが漢字の読みの一部である可能性が高い場合は削除
+    // 2文字セットの繰り返し（例: おに、おに、おにぎり → おにぎり）
+    corrected = corrected.replace(/([ぁ-んァ-ヶ]{1,3})[、,\s]+\1[、,\s]*/g, '$1');
+
+    // === フェーズ3: 語頭の吃音修正 ===
+
+    // 語頭の繰り返し + 漢字（例: 「ぼ、僕は」→「僕は」）
+    // 1文字のひらがな + 読点/スペース + 漢字の場合のみ（助詞「の」「を」等を誤削除しないよう）
+    corrected = corrected.replace(/([ぁ-ん])[、,]+\1*([一-龯々])/g, (match, kana, kanji) => {
         return kanji;
     });
 
-    // 吃音パターン5: 長音の過剰な伸ばし（例: あーーー → あー）
+    // === フェーズ4: 音の伸ばし・詰まり ===
+
+    // 長音の過剰な伸ばし（例: あーーー → あー）
     corrected = corrected.replace(/ー{2,}/g, 'ー');
 
-    // 吃音パターン6: 「っ」の連続（例: えっっっと → えっと）
+    // 「っ」の連続（例: えっっっと → えっと）
     corrected = corrected.replace(/っ{2,}/g, 'っ');
 
-    // 吃音パターン7: フィラー語の繰り返し（例: えー、えー → えー）
-    corrected = corrected.replace(/(えー|あー|うー|あの|えっと)[、,\s]*(えー|あー|うー|あの|えっと)[、,\s]*/gi, '$1、');
+    // 「…」の連続
+    corrected = corrected.replace(/…{2,}/g, '…');
+
+    // === フェーズ5: フィラー語の処理 ===
+
+    // フィラー語の繰り返し（例: えー、えー、えーっと → えーっと）
+    corrected = corrected.replace(/(えー|あー|うー|あの|えっと|まあ|その|なんか)[、,\s]+(えー|あー|うー|あの|えっと|まあ|その|なんか)[、,\s]*/gi, '$1、');
+
+    // 文頭のフィラー語を除去（例: "えーっと、今日は..." → "今日は..."）
+    corrected = corrected.replace(/^(えー[っと]*|あー|うー|あの[ー]*|えっと|まあ|その|なんか)[、,\s]*/i, '');
+
+    // === フェーズ6: 整形 ===
 
     // 先頭・末尾の余分な句読点を整理
     corrected = corrected.replace(/^[、,\s]+/, '').replace(/[、,\s]+$/, '');
@@ -308,9 +362,12 @@ function correctStuttering(text) {
     // 連続した読点を1つに
     corrected = corrected.replace(/、{2,}/g, '、');
 
-    // 修正があった場合のみログ（デバッグ用、本番では非表示）
+    // 連続したスペースを1つに
+    corrected = corrected.replace(/\s{2,}/g, ' ');
+
+    // 修正があった場合のみログ
     if (text !== corrected) {
-        console.log('[吃音修正] 適用済み');
+        console.log('[吃音修正] 適用済み:', text, '→', corrected);
     }
 
     return corrected;
